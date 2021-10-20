@@ -37,6 +37,8 @@ public class Block_leomiglio02 {
     public int hashCode() {
         hash = hash * 7 + dati.hashCode();
         hash = hash * 7 + timestamp.hashCode();
+        if (precedente != null)
+            hash = hash * 7 + precedente.hashCode();
         return hash;
     }
 
