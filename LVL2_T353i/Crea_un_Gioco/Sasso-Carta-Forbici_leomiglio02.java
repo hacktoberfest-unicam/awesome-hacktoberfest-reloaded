@@ -59,5 +59,7 @@ class SassoCartaForbici {
         s.setP1("forbici");
         System.out.println(s.play());// dovrebbe vincere 1 (carta) contro forbici
 
+        s.setP2("forbici");
+        System.out.println(s.play());// dovrebbe essere pareggio
     }
 }
