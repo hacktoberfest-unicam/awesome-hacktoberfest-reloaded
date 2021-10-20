@@ -1,5 +1,5 @@
 '''
-Semplice algoritmo che preso un array, lo ordina in loco secondo il piermuz sort.
+Semplice algoritmo che preso un array, lo ordina secondo il piermuz sort.
 Il piermuz sort è un banale algoritmo di ordinamento basato su confronti,
 avente pessima complessità computazionale e pessimo come il sottoscritto.
 '''
