@@ -135,6 +135,15 @@ function removePlayer(id) {
       if (index > -1) {
         votes.splice(index, 1);
       }
+
+      if (players.length <= 2) {
+        game.status = GameStatus.LOBBY;
+        game.letters = [];
+        game.choser = null
+        letters = [];
+        votes = [];
+        send("GAME", game);
+      }
       break;
     }
   }
