@@ -17,7 +17,6 @@ public class Main {
                 System.out.println("Devi inserire un solo carattere");
                 continue;
             }
-            char carattere = input.charAt(0);
             if (!(Character.isLetter(input.charAt(0)))) {
                 System.out.println("Devi inserire una lettera");
                 continue;
