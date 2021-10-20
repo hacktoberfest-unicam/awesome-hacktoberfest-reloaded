@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gioco dell'impiccato</title>
+  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+</head>
+<body>
+
+<div id="overlay">
+  <div id="overlay-title">Caricamento in corso...</div>
+  <div id="overlay-content">Welcome, to Hangman game</div>
+</div>
+
+<div class="lives-container">
+  <div id="lives">0/6</div>
+  <img class="lives-heart" src="heart.png">
+</div>
+
+<div id="keyboard">
+  <div class="letter">A</div>
+  <div class="letter">B</div>
+  <div class="letter">C</div>
+  <div class="letter">D</div>
+  <div class="letter">E</div>
+  <div class="letter">F</div>
+  <div class="letter">G</div>
+  <div class="letter">H</div>
+  <div class="letter">I</div>
+  <div class="letter">J</div>
+  <div class="letter">K</div>
+  <div class="letter">L</div>
+  <div class="letter">M</div>
+  <div class="letter">N</div>
+  <div class="letter">O</div>
+  <div class="letter">P</div>
+  <div class="letter">Q</div>
+  <div class="letter">R</div>
+  <div class="letter">S</div>
+  <div class="letter">T</div>
+  <div class="letter">U</div>
+  <div class="letter">V</div>
+  <div class="letter">W</div>
+  <div class="letter">X</div>
+  <div class="letter">Y</div>
+  <div class="letter">Z</div>
+</div>
+
+<div id="hangman-container">
+  <div id="hangman">
+    <div class="pole2 h-line absolute"></div>
+    <div class="pole3 v-line absolute"></div>
+    <div class="pole1 v-line absolute"></div>
+    <div class="base h-line absolute"></div>
+
+    <div id="body" class="absolute">
+      <div id="head" class="absolute hide"></div>
+      <div id="neck" class="absolute hide"></div>
+      <div id="left-arm" class="absolute hide"></div>
+      <div id="right-arm" class="absolute hide"></div>
+      <div id="waist" class="absolute hide"></div>
+      <div id="left-leg" class="absolute hide"></div>
+      <div id="right-leg" class="absolute hide"></div>
+    </div>
+  </div>
+
+  <div id="word-container"></div>
+</div>
+
+<div class="flex" style="margin-top: 120px">
+  <form id="guess-form" class="input-group">
+    <input type="text" id="guess-input" required />
+    <label for="guess-input" class="input-label">Parola</label>
+  </form>
+  <button type="submit" form="guess-form">Indovina</button>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
