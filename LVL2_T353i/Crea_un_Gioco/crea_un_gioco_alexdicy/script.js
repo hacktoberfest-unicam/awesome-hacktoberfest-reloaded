@@ -19,6 +19,7 @@ let lives = 6;
 let totalLives = lives;
 updateLives();
 
+// chiedi al giocatore 1 di inserire una parola
 overlayTitle.innerText = "Giocatore 1, scegli una parola:"
 overlayContent.innerHTML = `
     <br>
@@ -32,6 +33,7 @@ overlayContent.innerHTML = `
     </div>`;
 
 
+// imposta le lettere sulla pagina
 function setWord() {
   let input = overlayContent.getElementsByTagName("input")[0];
   let word = input.value.trim().toUpperCase();
@@ -64,6 +66,11 @@ function setWord() {
   overlay.classList.add("hide");
 }
 
+// imposta il click per ogni lettera che può essere scelta
+// controlla se è presente nella parola,
+// se non è presente toglie una vita
+//
+// aggiorna le vite e chiama il controllo al gameover o win
 for (let letter of keyboard.childNodes) {
   letter.addEventListener("click", () => {
     if (letter.classList.contains("guessed")) {
@@ -91,10 +98,12 @@ for (let letter of keyboard.childNodes) {
   });
 }
 
+// cambia il testo a inizio pagina
 function updateLives() {
   livesText.innerText = `${lives}/${totalLives}`;
 }
 
+// aggiorna le parti del corpo dell'omino o chiude il gioco se non ha più vite
 function checkGameOver() {
   if (lives < 0) {
     openOverlay("GameOver, Giocatore 2");
@@ -123,6 +132,8 @@ function checkGameOver() {
   }
 }
 
+// se tutte le lettere della parola sono state indovinate il gioco finisce
+// e il giocatore 2 vince
 function checkHasWon() {
   for (let l of letters) {
     if (!l.guessed) {
