@@ -32,6 +32,6 @@ public class Blockchain_leomiglio02 {
         Block_leomiglio02 b1= new Block_leomiglio02("Questo è il primo blocco", new Date(System.currentTimeMillis()));
         Blockchain_leomiglio02 blockchain = new Blockchain_leomiglio02(b1);
         Block_leomiglio02 b2= new Block_leomiglio02("Questo è il secondo blocco", new Date(System.currentTimeMillis()));
-        blockchain.addBlock(b2)
+        blockchain.addBlock(b2);
     }
 }
