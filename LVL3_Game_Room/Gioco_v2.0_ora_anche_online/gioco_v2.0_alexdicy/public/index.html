@@ -4,8 +4,17 @@
   <title>Gioco dell'impiccato</title>
   <link rel="stylesheet" href="style.css">
   <meta charset="utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
+<div id="lobby" class="hide">
+  <div class="lobby-title">Lobby</div>
+  <div id="lobby-player-list"></div>
+  <button id="start-vote">Vota per iniziare</button>
+</div>
 
 <div id="overlay">
   <div id="overlay-title">Caricamento in corso...</div>
@@ -73,7 +82,7 @@
 
 <div class="flex" style="margin-top: 120px">
   <form id="guess-form" class="input-group">
-    <input type="text" id="guess-input" required />
+    <input type="text" id="guess-input" required/>
     <label for="guess-input" class="input-label">Parola</label>
   </form>
   <button type="submit" form="guess-form">Indovina</button>

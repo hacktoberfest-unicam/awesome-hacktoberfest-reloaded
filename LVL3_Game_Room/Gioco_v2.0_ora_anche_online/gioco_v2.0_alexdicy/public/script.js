@@ -1,4 +1,7 @@
 let connectedPlayers = document.getElementById("connected-players");
+let lobby = document.getElementById("lobby");
+let lobbyPlayerList = document.getElementById("lobby-player-list");
+let startVote = document.getElementById("start-vote");
 let overlay = document.getElementById("overlay");
 let overlayTitle = document.getElementById("overlay-title");
 let overlayContent = document.getElementById("overlay-content");
@@ -15,30 +18,64 @@ let waist = document.getElementById("waist");
 let leftLeg = document.getElementById("left-leg");
 let rightLeg = document.getElementById("right-leg");
 
+let templates = {
+  lobbyPlayer: name => {
+    return `<div class="lobby-player">
+              <div class="flex">
+                <img src="player-avatar.svg" alt="">
+                <div class="name">${name}</div>
+              </div>
+            </div>`;
+  },
+  lobbyNextPlayer: () => {
+    return `<div class="lobby-player not-connected">
+              <div class="flex">
+                <img src="player-avatar.svg" alt="">
+                <div class="name">Attesa altri giocatori...</div>
+              </div>
+            </div>`;
+  }
+}
+
+
+let previousGameInfo = {
+  status: -1
+};
+
+let gameInfo = previousGameInfo;
+let player = {};
+
 let letters = [];
 
 let lives = 6;
 let totalLives = lives;
 updateLives();
 
-// chiedi al giocatore 1 di inserire una parola
-overlayTitle.innerText = "Giocatore 1, scegli una parola:"
-overlayContent.innerHTML = `
-    <br>
-    <br>
-    <div class="flex">
-      <div class="input-group">
-        <input type="text" placeholder="Topolino" id="word-input" required />
-        <label for="word-input" class="input-label">Parola</label>
-      </div>
-      <button onclick="setWord()">Conferma</button>
-    </div>`;
+// websocket
+let ws;
 
 connectWS();
+updateGameInfo();
 
+function joinGame() {
+  let input = overlayContent.getElementsByTagName("input")[0];
+  let nickname = input.value.trim();
+  if (nickname.length < 2) {
+    alert("Il nickname deve essere lungo 2 o più caratteri");
+    input.focus();
+    return;
+  }
+
+  send("JOIN", {nickname});
+}
+
+startVote.addEventListener("click", () => {
+  startVote.disabled = true;
+  send("START_VOTE");
+});
 
 // imposta le lettere sulla pagina
-function setWord() {
+function sendWord() {
   let input = overlayContent.getElementsByTagName("input")[0];
   let word = input.value.trim().toUpperCase();
   if (word.length < 2 || word.includes(" ")) {
@@ -52,20 +89,7 @@ function setWord() {
     return;
   }
 
-  wordContainer.innerHTML = "";
-  letters = [];
-
-  for (let c of word) {
-    let wordLetter = document.createElement("div");
-    wordLetter.classList.add("word-letter");
-
-    wordContainer.appendChild(wordLetter);
-    letters.push({
-      letter: c,
-      guessed: false,
-      element: wordLetter
-    });
-  }
+  send("CHOOSE_WORD", {word});
 
   overlay.classList.add("hide");
 }
@@ -143,6 +167,7 @@ function checkHasWon() {
     if (!l.guessed) {
       return;
     }
+    openOverlay("Hai vinto, Giocatore 2");
   }
 }
 
@@ -176,7 +201,7 @@ guessForm.addEventListener("submit", e => {
 
 function connectWS() {
   const secure = window.location.protocol !== "http:";
-  const ws = new WebSocket((secure ? "wss://" : "ws://") + window.location.host);
+  ws = new WebSocket((secure ? "wss://" : "ws://") + window.location.host);
   ws.addEventListener("error", () => {
     this.alert("Connection error");
   });
@@ -184,6 +209,20 @@ function connectWS() {
     this.alert("Disconnected from server, reconnecting");
     setTimeout(this.connectWS, 1000);
   });
+  ws.addEventListener("open", () => {
+    // chiedi al giocatore di inserire il proprio nickname
+    overlayTitle.innerText = "Scegli il tuo nickname:"
+    overlayContent.innerHTML = `
+    <br>
+    <br>
+    <div class="flex">
+      <div class="input-group">
+        <input type="text" placeholder="Pippo" id="nick-input" minlength="2" required />
+        <label for="nick-input" class="input-label">Nickname</label>
+      </div>
+      <button onclick="joinGame()">Entra</button>
+    </div>`;
+  })
   ws.addEventListener("message", m => {
     let message = JSON.parse(m.data);
     switch (message.type) {
@@ -193,10 +232,103 @@ function connectWS() {
       case "WELCOME":
         console.log("Received Welcome from Websocket server");
         break;
+      case "LOG":
+        console.log(message.log);
+        break;
+      case "GAME":
+        previousGameInfo = gameInfo;
+        gameInfo = message;
+        updateGameInfo();
+        break;
+      case "JOINED":
+        console.log("Joined successfully");
+        player = message.player;
+        overlay.classList.add("hide");
+        break;
+      case "PLAYER_INFO":
+        player = message.player;
+        break;
       case "PLAYERS":
-        connectedPlayers.innerText = message.players.length + " giocatori connessi";
-        console.log("message.players:", message.players);
+        connectedPlayers.innerText = `Player ID: ${player.id} | ${message.players.length} giocatori connessi | IDs: ${JSON.stringify(message.players)}`;
+        resetLobbyPlayerList();
+        for (let p of message.players) {
+          addLobbyPlayer(p.nickname);
+        }
         break;
     }
   });
+}
+
+function send(type, data = {}) {
+  data.type = type;
+  ws.send(JSON.stringify(data));
+}
+
+function updateGameInfo() {
+  if (previousGameInfo.status !== gameInfo.status) {
+    switch (gameInfo.status) {
+      case 0:
+        console.log("Game Status: LOBBY");
+        lobby.classList.remove("hide");
+        resetLobbyPlayerList();
+        break;
+      case 1:
+        console.log("Game Status: VOTING_PLAYER");
+        break;
+      case 2:
+        console.log("Game Status: CHOOSING_WORD");
+        lobby.classList.remove("hide");
+        if (player.id === gameInfo.choser.id) {
+          overlay.classList.remove("hide");
+          overlayTitle.innerText = player.nickname + ", scegli una parola:";
+          overlayContent.innerHTML = `
+              <br>
+              <br>
+              <div class="flex">
+                <div class="input-group">
+                  <input type="text" placeholder="Topolino" id="word-input" required />
+                  <label for="word-input" class="input-label">Parola</label>
+                </div>
+                <button onclick="sendWord()">Conferma</button>
+              </div>`;
+        } else {
+          openOverlay(gameInfo.choser.nickname, "sta scegliendo la parola...");
+        }
+        break;
+      case 3:
+        console.log("Game Status: PLAYING");
+        overlay.classList.add("hide");
+        lobby.classList.add("hide");
+
+        wordContainer.innerHTML = "";
+        letters = [];
+
+        for (let c of gameInfo.letters) {
+          let wordLetter = document.createElement("div");
+          wordLetter.classList.add("word-letter");
+
+          wordContainer.appendChild(wordLetter);
+          letters.push({
+            letter: c,
+            guessed: false,
+            element: wordLetter
+          });
+        }
+        break;
+      case 4:
+        console.log("Game Status: ENDED");
+        break;
+    }
+  }
+}
+
+function resetLobbyPlayerList() {
+  lobbyPlayerList.innerHTML = "";
+  lobbyPlayerList.insertAdjacentHTML("beforeend", templates.lobbyNextPlayer());
+}
+
+function addLobbyPlayer(name) {
+  lobbyPlayerList.lastElementChild.remove();
+  lobbyPlayerList.insertAdjacentHTML("beforeend", templates.lobbyPlayer(name));
+  lobbyPlayerList.insertAdjacentHTML("beforeend", templates.lobbyNextPlayer());
 }

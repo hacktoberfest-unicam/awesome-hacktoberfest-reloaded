@@ -1,5 +1,5 @@
 html, body {
-    font-family: sans-serif;
+    font-family: 'Roboto', sans-serif;
     margin: 0;
 }
 
@@ -22,7 +22,7 @@ html, body {
     line-height: 40px;
 }
 
-#overlay {
+#lobby, #overlay {
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -33,6 +33,69 @@ html, body {
     background-color: white;
     z-index: 20;
     text-align: center;
+}
+
+.lobby-title {
+    margin-top: 20px;
+    font-size: 36px;
+    font-weight: 700;
+}
+
+#lobby-player-list {
+    width: 100%;
+    max-width: 680px;
+    margin: auto auto 0 auto;
+}
+
+.lobby-player {
+    display: inline-block;
+    width: 100%;
+    max-width: 280px;
+    margin: 12px;
+    background-color: #f5f8ff;
+    border: 4px solid black;
+    border-radius: 4px;
+    box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+}
+
+.lobby-player > .flex {
+    display: flex;
+    align-items: center;
+}
+
+.lobby-player:last-of-type:nth-of-type(odd):not(:first-child) {
+    margin-right: 328px;
+}
+
+.lobby-player > .flex > img {
+    border-radius: 50%;
+    margin: 4px auto 4px 4px;
+    height: 42px;
+    background-color: #d0dcff;
+    border: 2px solid #98b1fb;
+    vertical-align: middle;
+}
+
+.lobby-player > .flex > .name {
+    margin-left: calc(-48px + 10%);
+    margin-right: auto;
+}
+
+.lobby-player.not-connected {
+    opacity: 0.5;
+}
+
+#start-vote {
+    margin: 40px auto auto auto;
+    width: 200px;
+    border-radius: 2px;
+    background-color: #118ea3;
+    font-family: inherit;
+}
+
+#start-vote:disabled {
+    cursor: default;
+    opacity: 0.2;
 }
 
 #overlay-title {
@@ -84,7 +147,7 @@ html, body {
 .letter:not(.guessed):hover {
     color: #414141;
     cursor: pointer;
-    text-shadow: 0px 0px 2px #3e6f75;
+    text-shadow: 0 0 2px #3e6f75;
 }
 
 .letter.guessed:before {
@@ -239,6 +302,7 @@ html, body {
 }
 
 button {
+    font-family: inherit;
     background-color: #9b9b9b;
     border: none;
     border-radius: 8px 8px 8px 0;
@@ -257,6 +321,7 @@ button {
     padding: 15px 0 0;
     margin-top: 10px;
     width: 50%;
+    max-width: 328px;
 }
 
 input {
@@ -270,6 +335,7 @@ input {
     background: transparent;
     transition: border-color 0.2s;
 }
+
 input:not(:focus)::placeholder {
     color: transparent;
 }
@@ -300,6 +366,7 @@ input:focus {
     border-image: linear-gradient(to right, #11998e, #38ef7d);
     border-image-slice: 1;
 }
+
 input:focus ~ .input-label {
     position: absolute;
     top: 0;
