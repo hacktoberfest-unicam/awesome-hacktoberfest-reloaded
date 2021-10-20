@@ -1,0 +1,301 @@
+html, body {
+    font-family: sans-serif;
+    margin: 0;
+}
+
+*, *:before, *:after {
+    box-sizing: content-box;
+}
+
+#overlay {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+    z-index: 99999;
+    text-align: center;
+}
+
+#overlay-title {
+    margin-top: auto;
+    font-size: 32px;
+}
+
+#overlay-content {
+    margin-top: 12px;
+    margin-bottom: auto;
+    font-size: 22px;
+}
+
+.hide {
+    display: none !important;
+}
+
+.lives-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+#lives {
+    font-size: 28px;
+}
+
+.lives-heart {
+    width: 32px;
+    margin-left: 20px;
+}
+
+#keyboard {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 26px auto 0 auto;
+    max-width: 800px;
+}
+
+.letter {
+    position: relative;
+    padding: 10px 20px;
+    font-size: 28px;
+}
+
+.letter:not(.guessed):hover {
+    color: #414141;
+    cursor: pointer;
+    text-shadow: 0px 0px 2px #3e6f75;
+}
+
+.letter.guessed:before {
+    content: "";
+    position: absolute;
+    margin-top: 2px;
+    margin-left: -2px;
+    width: 3px;
+    height: 34px;
+    transform: rotate(-40deg);
+    transform-origin: top left;
+    background-color: #c70000;
+}
+
+#hangman-container {
+    display: flex;
+    align-items: end;
+    margin-top: 22vh;
+    margin-left: 22vw;
+}
+
+#hangman {
+    position: relative;
+    width: 164px;
+    height: 126px;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.h-line {
+    border-top: 4px solid saddlebrown;
+}
+
+.v-line {
+    border-left: 4px solid saddlebrown;
+}
+
+.pole2 {
+    top: 2px;
+    left: 40px;
+    width: 64px;
+    border-radius: 2px;
+}
+
+.pole3 {
+    top: 2px;
+    left: 100px;
+    height: 20px;
+    border-radius: 2px;
+}
+
+.pole1 {
+    top: 2px;
+    left: 40px;
+    height: 120px;
+    border-radius: 2px;
+}
+
+.base {
+    top: 120px;
+    width: 80px;
+    border-width: 6px;
+    border-radius: 2px;
+}
+
+#body {
+    top: 22px;
+    left: calc(100px - 26px);
+    width: 50px;
+    height: 80px;
+}
+
+#head {
+    left: 16px;
+    margin: 0 auto;
+    width: 20px;
+    height: 20px;
+    border: 2px solid black;
+    border-radius: 50%;
+}
+
+#neck {
+    top: 24px;
+    left: 27px;
+    height: 10px;
+    border-left: 2px solid black;
+}
+
+#left-arm {
+    top: 16px;
+    left: 27px;
+    height: 18px;
+    transform: rotate(-60deg);
+    transform-origin: bottom center;
+    border-left: 2px solid black;
+}
+
+#right-arm {
+    top: 16px;
+    left: 27px;
+    height: 18px;
+    transform: rotate(60deg);
+    transform-origin: bottom center;
+    border-left: 2px solid black;
+}
+
+#waist {
+    top: 34px;
+    left: 27px;
+    height: 20px;
+    border-left: 2px solid black;
+}
+
+#left-leg {
+    top: 35px;
+    left: 27px;
+    height: 18px;
+    transform: rotate(-140deg);
+    transform-origin: bottom center;
+    border-left: 2px solid black;
+}
+
+#right-leg {
+    top: 35px;
+    left: 27px;
+    height: 18px;
+    transform: rotate(140deg);
+    transform-origin: bottom center;
+    border-left: 2px solid black;
+}
+
+#word-container {
+    display: flex;
+}
+
+.word-letter {
+    box-sizing: border-box;
+    text-align: center;
+    padding-top: 4px;
+    font-size: 28px;
+    height: 40px;
+    width: 32px;
+    margin-right: 16px;
+    border-bottom: 2px solid gray;
+}
+
+.flex {
+    display: flex;
+    justify-content: center;
+}
+
+button {
+    background-color: #9b9b9b;
+    border: none;
+    border-radius: 8px 8px 8px 0;
+    color: white;
+    height: 50px;
+    margin-top: auto;
+    padding: 0 20px;
+    text-shadow: 0 0 16px rgba(0, 0, 0, 0.44);
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.input-group {
+    position: relative;
+    padding: 15px 0 0;
+    margin-top: 10px;
+    width: 50%;
+}
+
+input {
+    font-family: inherit;
+    width: 100%;
+    border: 0;
+    border-bottom: 2px solid #9b9b9b;
+    outline: 0;
+    font-size: 1.3rem;
+    padding: 7px 0;
+    background: transparent;
+    transition: border-color 0.2s;
+}
+input:not(:focus)::placeholder {
+    color: transparent;
+}
+
+input::placeholder {
+    transition: color 0.1s;
+}
+
+input:placeholder-shown ~ .input-label {
+    font-size: 1.3rem;
+    cursor: text;
+    top: 20px;
+}
+
+.input-label {
+    position: absolute;
+    top: 0;
+    display: block;
+    transition: 0.2s;
+    font-size: 1rem;
+    color: #9b9b9b;
+}
+
+input:focus {
+    padding-bottom: 6px;
+    font-weight: 700;
+    border-width: 3px;
+    border-image: linear-gradient(to right, #11998e, #38ef7d);
+    border-image-slice: 1;
+}
+input:focus ~ .input-label {
+    position: absolute;
+    top: 0;
+    display: block;
+    transition: 0.2s;
+    font-size: 1rem;
+    color: #11998e;
+    font-weight: 700;
+}
+
+/* reset input */
+input:required, input:invalid {
+    box-shadow: none;
+}
