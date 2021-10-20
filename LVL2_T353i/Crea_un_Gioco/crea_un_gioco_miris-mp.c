@@ -1,9 +1,5 @@
 #include <stdio.h>
 
-void positioning_ship(int mode)
-{
-}
-
 int main()
 {
     printf("***** CARTA FORBICI SASSO ******\n");
