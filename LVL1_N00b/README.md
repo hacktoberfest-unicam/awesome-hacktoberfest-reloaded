@@ -1,10 +1,10 @@
 # LVL1_N00b
-
+Il moltiplicatore di questo livello è x0.8 quindi ogni punteggio dei problemi sarà moltiplicato per questo valore
 ## I problemi di questo livello sono 4:
-1. [Hello World](Hello_World/)
-2. [Trova il Duplicato](Trova_il_Duplicato/)
-3. [Trova Prima e Ultima Occorrenza](Trova_prima_e_ultima_occorrenza/)
-4. [Radice Quadrata](Radice_Quadrata/)
+1. [Hello World](Hello_World/) [0 punti]
+2. [Trova il Duplicato](Trova_il_Duplicato/) [1 punto]
+3. [Trova Prima e Ultima Occorrenza](Trova_prima_e_ultima_occorrenza/) [1 punto]
+4. [Radice Quadrata](Radice_Quadrata/) [1 punto]
 
 ## 1. Hello World
 Usando un linguaggio a tua scelta della lista dei linguaggi in [Whitelist](/WHITELIST.md), realizza un programma che mostri a schermo HELLO WORLD quando eseguito o interpretato.

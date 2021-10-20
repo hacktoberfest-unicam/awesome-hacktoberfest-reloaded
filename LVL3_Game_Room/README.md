@@ -1,10 +1,10 @@
 # LVL3_Game_Room
-
+Il moltiplicatore di questo livello è x1.8 quindi ogni punteggio dei problemi sarà moltiplicato per questo valore
 ## I problemi di questo livello sono 4:
-1. [Blockchain v2.0](Blockchain_v2.0/)
-2. [Crea un Backend POST](POST_Back-End/)
-3. [Gioco v2.0](Gioco_v2.0_ora_anche_online/)
-4. [Crea un server IRC e il relativo client](IRC_server_e_client/)
+1. [Blockchain v2.0](Blockchain_v2.0/) [8 punti]
+2. [Crea un Backend POST](POST_Back-End/) [10 punti]
+3. [Gioco v2.0](Gioco_v2.0_ora_anche_online/) [12 punti]
+4. [Crea un server IRC e il relativo client](IRC_server_e_client/) [10 punti]
 
 ## 1. Blockchain v2.0
 Partendo dalla blockchain realizzata al livello precedente, implementa le funzionalità di salvataggio dei dati generati ad ogni sessione.
