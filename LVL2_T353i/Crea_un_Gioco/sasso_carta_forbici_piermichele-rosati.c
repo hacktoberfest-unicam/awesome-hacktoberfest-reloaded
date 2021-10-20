@@ -42,7 +42,7 @@ int newGame(char* name1, char* name2){
 		move2 = move(name2);
 		
 		if(move1 == move2)
-			printf("Game result: tie!");
+			printf("Game result: tie!\n");
 		if((move1 == 0 && move2 == 2) || (move1 == 1 && move2 == 0) || (move1 == 2 && move2 == 1))
 			return 0;
 		if((move1 == 0 && move2 == 1) || (move1 == 1 && move2 == 2) || (move1 == 2 && move2 == 0))
