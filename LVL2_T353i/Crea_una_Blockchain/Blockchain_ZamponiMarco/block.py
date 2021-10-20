@@ -8,7 +8,10 @@ class Block:
         self.data: str = data
         self.time = datetime.now()
         string = self.data + str(self.time)
-        self.hash = hashlib.md5(string.encode()).hexdigest()
+        if previous is not None:
+            string = string + previous.hash
+
+        self.hash = hashlib.sha256(string.encode()).hexdigest()
         self.previous = previous
         self.next = None
 
