@@ -1,4 +1,3 @@
-let connectedPlayers = document.getElementById("connected-players");
 let lobby = document.getElementById("lobby");
 let lobbyPlayerList = document.getElementById("lobby-player-list");
 let startVote = document.getElementById("start-vote");
@@ -249,7 +248,6 @@ function connectWS() {
         player = message.player;
         break;
       case "PLAYERS":
-        connectedPlayers.innerText = `Player ID: ${player.id} | ${message.players.length} giocatori connessi | IDs: ${JSON.stringify(message.players)}`;
         resetLobbyPlayerList();
         for (let p of message.players) {
           addLobbyPlayer(p.nickname);
