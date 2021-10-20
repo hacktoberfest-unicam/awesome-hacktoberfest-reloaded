@@ -1,9 +1,9 @@
 # LVL4_1337_F1n4l_B055
-
+Il moltiplicatore di questo livello è x4 quindi ogni punteggio dei problemi sarà moltiplicato per questo valore
 ## I problemi di questo livello sono 3:
-1. [Telegram Game Bot](Telegram_Game_Bot/)
-2. [Telegram Public API Bot](Telegram_Public_API_BOT/)
-3. [Crea un gioco](Crea_un_gioco/)
+1. [Telegram Game Bot](Telegram_Game_Bot/) [15 punti]
+2. [Telegram Public API Bot](Telegram_Public_API_BOT/) [8 punti]
+3. [Crea un gioco](Crea_un_gioco/) [15 punti]
 
 Per la realizzazione dei Bot Telegram, consigliamo l'uso dei framework JAVA [Botticelli](https://github.com/Jaeger87/Botticelli) e del framework [Python Telegram Bot](https://github.com/python-telegram-bot/python-telegram-bot).
 
