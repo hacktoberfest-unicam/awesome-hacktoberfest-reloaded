@@ -1,0 +1,9 @@
+;;;; Welcome to Portacle, the Portable Common Lisp Environment.
+;; For information on Portacle and how to use it, please read
+;;   https://portacle.github.io or *portacle-help*
+;; To report problems and to get help with issues,  please visit
+;;   https://github.com/portacle/portacle/issues
+;; 
+;; You can use this buffer for notes and tinkering with code.
+
+(format nil "Hello world!")
