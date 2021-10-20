@@ -1,5 +1,5 @@
 # LVL2_T353i
-Il moltiplicatore di questo livello è x0.8 quindi ogni punteggio dei problemi sarà moltiplicato per questo valore
+Il moltiplicatore di questo livello è x1 quindi ogni punteggio dei problemi sarà moltiplicato per questo valore
 ## I problemi di questo livello sono 4:
 1. [Ordinamento](Ordinamento/) [1 punto]
 2. [Documenta & Correggi](Documenta/) [1 punto]
