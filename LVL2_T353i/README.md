@@ -1,10 +1,10 @@
 # LVL2_T353i
-
+Il moltiplicatore di questo livello è x0.8 quindi ogni punteggio dei problemi sarà moltiplicato per questo valore
 ## I problemi di questo livello sono 4:
-1. [Ordinamento](Ordinamento/)
-2. [Documenta & Correggi](Documenta/)
-3. [Crea un Gioco](Crea_un_Gioco/)
-4. [Crea una BlockChain](Crea_una_Blockchain/)
+1. [Ordinamento](Ordinamento/) [1 punto]
+2. [Documenta & Correggi](Documenta/) [1 punto]
+3. [Crea un Gioco](Crea_un_Gioco/) [4 punti]
+4. [Crea una BlockChain](Crea_una_Blockchain/) [5 punti]
 
 ## 1. Ordinamento
 Lo scopo è realizzare un algoritmo di ordinamento di un array, in un linguaggio tra quelli forniti in [Whitelist](/WHITELIST.md) o nella lista [Linguaggi Utilizzabili](/LINGUAGGI_UTILIZZABILI.md)
