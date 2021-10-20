@@ -64,7 +64,6 @@ Come in ogni gioco ci sono delle missioni secondarie, ecco le nostre:
 * Esegui una Pull Request nella repository dell'app [Immuni](https://github.com/immuni-app)
 * Esegui una Pull Request nella repository dell'app [Verifica C19](https://github.com/ministero-salute/it-dgc-verificaC19-android)
 * Esegui una Pull Request nella repository [UnicamOrari](https://github.com/ZamponiMarco/UnicamOrari)
-* Esegui una Pull Request nella repository [Meetpad](https://github.com/regione-marche/meetpad-public)
 * Punti aggiuntivi se hai già iniziato a partecipare ad Hacktoberfest prima di Oggi
 
 Qua invece trovi del materiale extra open source, può esserti utile nei tuoi studi e per la tua crescita personale:
