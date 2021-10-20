@@ -4,6 +4,7 @@ let overlayContent = document.getElementById("overlay-content");
 let wordContainer = document.getElementById("word-container");
 let livesText = document.getElementById("lives");
 let keyboard = document.getElementById("keyboard");
+let guessForm = document.getElementById("guess-form");
 
 let head = document.getElementById("head");
 let neck = document.getElementById("neck");
@@ -26,7 +27,7 @@ overlayContent.innerHTML = `
     <br>
     <div class="flex">
       <div class="input-group">
-        <input type="input" placeholder="Topolino" id="word-input" required />
+        <input type="text" placeholder="Topolino" id="word-input" required />
         <label for="word-input" class="input-label">Parola</label>
       </div>
       <button onclick="setWord()">Conferma</button>
@@ -140,7 +141,6 @@ function checkHasWon() {
       return;
     }
   }
-  openOverlay("Hai vinto, Giocatore 2");
 }
 
 function openOverlay(title, content) {
@@ -148,3 +148,25 @@ function openOverlay(title, content) {
   overlayTitle.innerText = title;
   overlayContent.innerText = content ? content : "";
 }
+
+guessForm.addEventListener("submit", e => {
+  e.preventDefault();
+  let input = document.getElementById("guess-input");
+  let word = input.value.trim().toUpperCase();
+  if (word.length === letters.length) {
+    for (let i = 0; i < word.length; i++) {
+      // noinspection EqualityComparisonWithCoercionJS
+      if (word.charAt(i) != letters[i].letter) {
+        lives--;
+        updateLives();
+        checkGameOver();
+        return false;
+      }
+    }
+    // ha vinto
+    openOverlay("Hai vinto, Giocatore 2");
+  } else {
+    alert("La lunghezza della parola è diversa dalla parola da indovinare")
+  }
+  return false;
+});
