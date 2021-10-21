@@ -46,6 +46,10 @@ ws.on("connection", client => {
         });
         break;
       case "START_VOTE":
+        // do not count votes if they're the only player connected
+        if (players.length < 2) {
+          return;
+        }
         if (!votes.includes(player.id)) {
           votes.push(player.id);
         }

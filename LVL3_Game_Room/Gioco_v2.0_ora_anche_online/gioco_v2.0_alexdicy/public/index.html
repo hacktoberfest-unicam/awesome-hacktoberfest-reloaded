@@ -6,86 +6,117 @@
   <meta charset="utf-8">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 </head>
 <body>
 
-<div id="lobby" class="hide">
-  <div class="lobby-title">Lobby</div>
-  <div id="lobby-player-list"></div>
-  <button id="start-vote">Vota per iniziare</button>
-</div>
+<div id="app">
+  <div class="notifications">
+    <toast v-for="alert in alerts" :text="alert.text" :title="alert.title" :time="alert.time" @hidden="alert.hideCallback" :key="alert.id"></toast>
+  </div>
 
-<div id="overlay">
-  <div id="overlay-title">Caricamento in corso...</div>
-  <div id="overlay-content">Welcome, to Hangman game</div>
-</div>
+  <div id="lobby" v-if="showLobby">
+    <div class="lobby-title">Lobby</div>
+    <div id="lobby-player-list">
+      <div v-for="player in players" :key="player.id" class="lobby-player">
+        <div class="flex">
+          <img src="player-avatar.svg" alt="">
+          <div class="name">{{ player.nickname }}</div>
+        </div>
+      </div>
+      <div class="lobby-player not-connected">
+        <div class="flex">
+          <img src="player-avatar.svg" alt="">
+          <div class="name">Attesa altri giocatori...</div>
+        </div>
+      </div>
+    </div>
+    <button @click="voteToStart" ref="startVote" id="start-vote">Vota per iniziare</button>
+  </div>
 
-<div class="lives-container">
-  <div id="lives">0/6</div>
-  <img class="lives-heart" src="heart.png">
-</div>
-
-<!--<div class="bottom-info-container">
-  <div id="connected-players"></div>
-</div>-->
-
-<div id="keyboard">
-  <div class="letter">A</div>
-  <div class="letter">B</div>
-  <div class="letter">C</div>
-  <div class="letter">D</div>
-  <div class="letter">E</div>
-  <div class="letter">F</div>
-  <div class="letter">G</div>
-  <div class="letter">H</div>
-  <div class="letter">I</div>
-  <div class="letter">J</div>
-  <div class="letter">K</div>
-  <div class="letter">L</div>
-  <div class="letter">M</div>
-  <div class="letter">N</div>
-  <div class="letter">O</div>
-  <div class="letter">P</div>
-  <div class="letter">Q</div>
-  <div class="letter">R</div>
-  <div class="letter">S</div>
-  <div class="letter">T</div>
-  <div class="letter">U</div>
-  <div class="letter">V</div>
-  <div class="letter">W</div>
-  <div class="letter">X</div>
-  <div class="letter">Y</div>
-  <div class="letter">Z</div>
-</div>
-
-<div id="hangman-container">
-  <div id="hangman">
-    <div class="pole2 h-line absolute"></div>
-    <div class="pole3 v-line absolute"></div>
-    <div class="pole1 v-line absolute"></div>
-    <div class="base h-line absolute"></div>
-
-    <div id="body" class="absolute">
-      <div id="head" class="absolute hide"></div>
-      <div id="neck" class="absolute hide"></div>
-      <div id="left-arm" class="absolute hide"></div>
-      <div id="right-arm" class="absolute hide"></div>
-      <div id="waist" class="absolute hide"></div>
-      <div id="left-leg" class="absolute hide"></div>
-      <div id="right-leg" class="absolute hide"></div>
+  <div id="overlay" v-if="overlay.show">
+    <div id="overlay-title">{{ overlay.title }}</div>
+    <div id="overlay-content">
+      {{ overlay.content }}
+      <div class="flex" v-if="overlay.showInput">
+        <div class="input-group">
+          <input type="text" :placeholder="overlay.input.placeholder" id="overlay-input" ref="overlayInput"
+                 :minlength="overlay.input.minLength" :required="overlay.input.required"
+                 @keyup.enter="overlay.input.onSend" v-model="overlay.input.value" autofocus/>
+          <label for="overlay-input" class="input-label">{{ overlay.input.label }}</label>
+        </div>
+        <button @click="overlay.input.onSend">{{ overlay.input.buttonText }}</button>
+      </div>
     </div>
   </div>
 
-  <div id="word-container"></div>
-</div>
+  <div class="lives-container">
+    <div id="lives">{{ lives }}/{{ totalLives }}</div>
+    <img class="lives-heart" src="heart.png">
+  </div>
 
-<div class="flex" style="margin-top: 120px">
-  <form id="guess-form" class="input-group">
-    <input type="text" id="guess-input" required/>
-    <label for="guess-input" class="input-label">Parola</label>
-  </form>
-  <button type="submit" form="guess-form">Indovina</button>
+  <!--<div class="bottom-info-container">
+  <div id="connected-players"></div>
+</div>-->
+
+  <div id="keyboard">
+    <div class="letter">A</div>
+    <div class="letter">B</div>
+    <div class="letter">C</div>
+    <div class="letter">D</div>
+    <div class="letter">E</div>
+    <div class="letter">F</div>
+    <div class="letter">G</div>
+    <div class="letter">H</div>
+    <div class="letter">I</div>
+    <div class="letter">J</div>
+    <div class="letter">K</div>
+    <div class="letter">L</div>
+    <div class="letter">M</div>
+    <div class="letter">N</div>
+    <div class="letter">O</div>
+    <div class="letter">P</div>
+    <div class="letter">Q</div>
+    <div class="letter">R</div>
+    <div class="letter">S</div>
+    <div class="letter">T</div>
+    <div class="letter">U</div>
+    <div class="letter">V</div>
+    <div class="letter">W</div>
+    <div class="letter">X</div>
+    <div class="letter">Y</div>
+    <div class="letter">Z</div>
+  </div>
+
+  <div id="hangman-container">
+    <div id="hangman">
+      <div class="pole2 h-line absolute"></div>
+      <div class="pole3 v-line absolute"></div>
+      <div class="pole1 v-line absolute"></div>
+      <div class="base h-line absolute"></div>
+
+      <div id="body" class="absolute">
+        <div id="head" class="absolute hide"></div>
+        <div id="neck" class="absolute hide"></div>
+        <div id="left-arm" class="absolute hide"></div>
+        <div id="right-arm" class="absolute hide"></div>
+        <div id="waist" class="absolute hide"></div>
+        <div id="left-leg" class="absolute hide"></div>
+        <div id="right-leg" class="absolute hide"></div>
+      </div>
+    </div>
+
+    <div id="word-container"></div>
+  </div>
+
+  <div class="flex" style="margin-top: 120px">
+    <form id="guess-form" class="input-group">
+      <input type="text" id="guess-input" required/>
+      <label for="guess-input" class="input-label">Parola</label>
+    </form>
+    <button type="submit" form="guess-form">Indovina</button>
+  </div>
 </div>
 
 <script src="script.js"></script>
