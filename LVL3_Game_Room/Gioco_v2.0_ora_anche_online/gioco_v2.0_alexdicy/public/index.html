@@ -7,7 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+  <!-- TODO: use production version  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
 </head>
 <body>
 
@@ -32,7 +33,7 @@
         </div>
       </div>
     </div>
-    <button @click="voteToStart" ref="startVote" id="start-vote">Vota per iniziare</button>
+    <button @click="voteToStart" :disabled="disableStartVote" id="start-vote">Vota per iniziare</button>
   </div>
 
   <div id="overlay" v-if="overlay.show">
@@ -89,25 +90,35 @@
     <div class="letter">Z</div>
   </div>
 
-  <div id="hangman-container">
-    <div id="hangman">
-      <div class="pole2 h-line absolute"></div>
-      <div class="pole3 v-line absolute"></div>
-      <div class="pole1 v-line absolute"></div>
-      <div class="base h-line absolute"></div>
+  <div class="main-container">
+    <div id="hangman-container">
+      <div id="hangman">
+        <div class="pole2 h-line absolute"></div>
+        <div class="pole3 v-line absolute"></div>
+        <div class="pole1 v-line absolute"></div>
+        <div class="base h-line absolute"></div>
 
-      <div id="body" class="absolute">
-        <div id="head" class="absolute hide"></div>
-        <div id="neck" class="absolute hide"></div>
-        <div id="left-arm" class="absolute hide"></div>
-        <div id="right-arm" class="absolute hide"></div>
-        <div id="waist" class="absolute hide"></div>
-        <div id="left-leg" class="absolute hide"></div>
-        <div id="right-leg" class="absolute hide"></div>
+        <div id="body" class="absolute">
+          <div id="head" class="absolute hide"></div>
+          <div id="neck" class="absolute hide"></div>
+          <div id="left-arm" class="absolute hide"></div>
+          <div id="right-arm" class="absolute hide"></div>
+          <div id="waist" class="absolute hide"></div>
+          <div id="left-leg" class="absolute hide"></div>
+          <div id="right-leg" class="absolute hide"></div>
+        </div>
+      </div>
+
+      <div id="word-container"></div>
+    </div>
+    <div class="sidebar">
+      <div v-for="player in players" :key="player.id" class="player">
+        <div class="flex">
+          <img src="player-avatar.svg" alt="">
+          <div class="name">{{ player.nickname }}</div>
+        </div>
       </div>
     </div>
-
-    <div id="word-container"></div>
   </div>
 
   <div class="flex" style="margin-top: 120px">

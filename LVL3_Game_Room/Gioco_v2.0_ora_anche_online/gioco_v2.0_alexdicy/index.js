@@ -3,6 +3,7 @@ import WebSocket from "ws";
 
 import Player from "./Player.js";
 import GameStatus from "./GameStatus.js";
+import Game from "./Game.js";
 
 const app = express();
 // servi i file statici (il client del gioco)
@@ -12,9 +13,7 @@ const server = app.listen(process.env.PORT || 80);
 
 const players = [];
 let nextPlayerId = 0;
-const game = {
-  status: GameStatus.LOBBY
-};
+const game = new Game();
 let votes = [];
 
 // contains the current word

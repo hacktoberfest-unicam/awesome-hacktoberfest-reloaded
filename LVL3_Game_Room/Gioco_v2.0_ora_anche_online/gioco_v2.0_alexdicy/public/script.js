@@ -9,6 +9,7 @@ const app = new Vue({
       status: -1
     },
     showLobby: false,
+    disableStartVote: false,
     players: [],
     player: {},
     letters: [],
@@ -102,7 +103,7 @@ const app = new Vue({
     voteToStart() {
       // allow vote only if there is more than one player
       if (this.players.length > 1) {
-        this.$refs.startVote.disabled = true;
+        this.disableStartVote = true;
         this.send("START_VOTE");
       }
     },
@@ -195,6 +196,7 @@ const app = new Vue({
         case 0:
           console.log("Game Status: LOBBY");
           this.showLobby = true;
+          this.disableStartVote = false;
           break;
         case 1:
           console.log("Game Status: VOTING_PLAYER");
