@@ -25,13 +25,13 @@
   <div id="lobby" v-if="showLobby">
     <div class="lobby-title">Lobby</div>
     <div id="lobby-player-list">
-      <div v-for="player in players" :key="player.id" class="lobby-player">
+      <div v-for="p in players" :key="p.id" class="player" :class="{me: p.id == player.id}">
         <div class="flex">
           <img class="avatar" src="images/player-avatar.svg" alt="">
-          <div class="name">{{ player.nickname }}</div>
+          <div class="name">{{ p.nickname }}</div>
         </div>
       </div>
-      <div class="lobby-player not-connected">
+      <div class="player not-connected">
         <div class="flex">
           <img class="avatar" src="images/player-avatar.svg" alt="">
           <div class="name">Attesa altri giocatori...</div>
@@ -48,7 +48,7 @@
       <div class="flex" v-if="overlay.showInput">
         <div class="input-group">
           <input type="text" :placeholder="overlay.input.placeholder" id="overlay-input" ref="overlayInput"
-                 :minlength="overlay.input.minLength" :required="overlay.input.required"
+                 :minlength="overlay.input.minLength" :required="overlay.input.required" autocomplete="off"
                  @keyup.enter="overlay.input.onSend" v-model="overlay.input.value" autofocus/>
           <div class="shadow"></div>
           <label for="overlay-input" class="input-label">{{ overlay.input.label }}</label>
@@ -121,11 +121,11 @@
       </div>
     </div>
     <div class="sidebar">
-      <div v-for="player in players" :key="player.id" class="player">
-        <img class="turn-arrow" v-if="player.id == gameInfo.turn.player" src="images/turn-arrow.svg" alt="Current turn">
+      <div v-for="p in players" :key="p.id" class="player" :class="{me: p.id == player.id}">
+        <img class="turn-arrow" v-if="p.id == gameInfo.turn.player" src="images/turn-arrow.svg" alt="Current turn">
         <div class="flex">
           <div class="avatar">
-            <svg class="crown" v-if="gameInfo.chooser && player.id == gameInfo.chooser.id" xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+            <svg class="crown" v-if="gameInfo.chooser && p.id == gameInfo.chooser.id" xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
               <g transform="translate(128 128) scale(1.21 1.21)" style="">
                 <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;"
                    transform="translate(-104.85 -104.85) scale(2.33 2.33)">
@@ -139,7 +139,7 @@
             </svg>
             <img src="images/player-avatar.svg" alt="">
           </div>
-          <div class="name">{{ player.nickname }}</div>
+          <div class="name">{{ p.nickname }}</div>
         </div>
       </div>
     </div>
@@ -147,7 +147,7 @@
 
   <div class="flex" style="margin-top: 120px">
     <form id="guess-form" class="input-group">
-      <input type="text" id="guess-input" required placeholder=" " :disabled="player.id != gameInfo.turn.player">
+      <input type="text" id="guess-input" required placeholder=" " :disabled="player.id != gameInfo.turn.player" autocomplete="off">
       <div class="shadow"></div>
       <label for="guess-input" class="input-label">Parola</label>
     </form>

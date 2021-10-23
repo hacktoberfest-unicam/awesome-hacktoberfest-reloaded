@@ -13,7 +13,10 @@ const server = app.listen(process.env.PORT || 80);
 
 const players = [];
 let nextPlayerId = 0;
+
 const game = new Game();
+let turnIndex = 0;
+
 let votes = [];
 
 // contains the current word
@@ -22,6 +25,9 @@ let letters = [];
 // abilita il server websocket
 const ws = new WebSocket.Server({noServer: true});
 ws.on("connection", client => {
+  if (nextPlayerId >= Number.MAX_SAFE_INTEGER) {
+    nextPlayerId = 0;
+  }
   let player = new Player(nextPlayerId);
 
   // heartbeat
@@ -154,6 +160,7 @@ function removePlayer(id) {
         game.status = GameStatus.LOBBY;
         game.letters = [];
         game.chooser = null
+        turnIndex = 0;
         letters = [];
         votes = [];
         send("GAME", game);
@@ -170,8 +177,20 @@ function startGame() {
   game.chooser = players[Math.floor(Math.random() * players.length)];
   console.log(`Player "${game.chooser.nickname}" (${game.chooser.id}) is the word chooser`);
   // turn settings
-  game.turn.player = game.chooser.id;
+  nextTurn();
   send("GAME", game);
+}
+
+function nextTurn() {
+  if (++turnIndex >= players.length) {
+    turnIndex = 0;
+  }
+  let player = players[turnIndex];
+  if (player.id === game.chooser.id) {
+    nextTurn();
+    return;
+  }
+  game.turn.player = player.id;
 }
 
 function send(type, data = {}, client = null) {
