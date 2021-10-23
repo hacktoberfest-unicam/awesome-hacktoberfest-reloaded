@@ -33,12 +33,20 @@ ws.on("connection", client => {
     removePlayer(client.playerId);
   });
   client.on("message", message => {
-    console.log(message, player);
+    console.log("--->", message, player);
+
     let data = JSON.parse(message);
     switch (data.type) {
       case "JOIN":
+        if (game.status === GameStatus.PLAYING) {
+          break;
+        }
+        let nickname = data.nickname.trim();
+        if (nickname.length < 2) {
+          break;
+        }
+        player.nickname = nickname;
         players.push(player);
-        player.nickname = data.nickname;
         send("JOINED", {player}, client);
         send("PLAYERS", {
           players: players
@@ -142,7 +150,7 @@ function removePlayer(id) {
       if (players.length <= 2) {
         game.status = GameStatus.LOBBY;
         game.letters = [];
-        game.choser = null
+        game.chooser = null
         letters = [];
         votes = [];
         send("GAME", game);
@@ -156,7 +164,8 @@ function startGame() {
   console.log("Game is starting");
   game.status = GameStatus.CHOOSING_WORD;
   // choose a random player
-  game.choser = players[Math.floor(Math.random() * players.length)];
+  game.chooser = players[Math.floor(Math.random() * players.length)];
+  console.log(`Player "${game.chooser.nickname}" (${game.chooser.id}) is the word chooser`);
   send("GAME", game);
 }
 

@@ -205,7 +205,7 @@ const app = new Vue({
         case GameStatus.CHOOSING_WORD:
           console.log("Game Status: CHOOSING_WORD");
 
-          if (this.player.id === this.gameInfo.choser.id) {
+          if (this.player.id === this.gameInfo.chooser.id) {
             this.openOverlay(this.player.nickname + ", scegli una parola:", null, {
               value: "",
               placeholder: "Topolino",
@@ -216,7 +216,7 @@ const app = new Vue({
               onSend: this.sendWord
             });
           } else {
-            this.openOverlay(this.gameInfo.choser.nickname, "sta scegliendo la parola...");
+            this.openOverlay(this.gameInfo.chooser.nickname, "sta scegliendo la parola...");
           }
           break;
         case GameStatus.PLAYING:
