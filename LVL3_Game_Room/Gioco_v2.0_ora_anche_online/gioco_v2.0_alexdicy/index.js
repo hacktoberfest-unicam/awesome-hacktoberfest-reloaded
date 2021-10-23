@@ -45,16 +45,18 @@ ws.on("connection", client => {
         if (nickname.length < 2) {
           break;
         }
+        // remove if already present
+        removePlayer(client.playerId);
+
         player.nickname = nickname;
         players.push(player);
         send("JOINED", {player}, client);
-        send("PLAYERS", {
-          players: players
-        });
+        send("PLAYERS", {players});
         break;
       case "START_VOTE":
         // do not count votes if they're the only player connected
-        if (players.length < 2) {
+        // or if the game is not in a lobby state
+        if (game.status !== GameStatus.LOBBY || players.length < 2) {
           return;
         }
         if (!votes.includes(player.id)) {
@@ -102,6 +104,7 @@ ws.on("connection", client => {
   // broadcast game info and players
   send("GAME", game);
   send("PLAYER_INFO", {player}, client);
+  send("PLAYERS", {players}, client);
 
   nextPlayerId++;
 });
@@ -166,6 +169,8 @@ function startGame() {
   // choose a random player
   game.chooser = players[Math.floor(Math.random() * players.length)];
   console.log(`Player "${game.chooser.nickname}" (${game.chooser.id}) is the word chooser`);
+  // turn settings
+  game.turn.player = game.chooser.id;
   send("GAME", game);
 }
 

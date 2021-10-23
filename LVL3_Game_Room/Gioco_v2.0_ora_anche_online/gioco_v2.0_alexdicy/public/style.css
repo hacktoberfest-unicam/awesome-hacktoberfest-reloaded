@@ -90,12 +90,12 @@ html, body {
     margin-right: 328px;
 }
 
-.lobby-player > .flex > img {
+.lobby-player > .flex > .avatar {
     border-radius: 50%;
     margin: 4px auto 4px 4px;
     height: 42px;
-    background-color: #d0dcff;
-    border: 2px solid #98b1fb;
+    background-color: hsl(225, 90%, 59%);
+    border: 2px solid hsl(225, 77%, 38%);
     vertical-align: middle;
 }
 
@@ -113,7 +113,7 @@ html, body {
     margin: 40px auto auto auto;
     width: 200px;
     border-radius: 2px;
-    background-color: #118ea3;
+    background-color: hsl(189, 81%, 35%);
     font-family: inherit;
 }
 
@@ -175,7 +175,11 @@ html, body {
 .letter:not(.guessed):hover {
     color: #414141;
     cursor: pointer;
-    text-shadow: 0 0 2px #3e6f75;
+    text-shadow: 0 0 2px hsl(189, 12%, 35%);
+}
+
+.other-turn .letter:not(.guessed) {
+    opacity: 0.3;
 }
 
 .letter.guessed:before {
@@ -194,13 +198,11 @@ html, body {
 .main-container {
     display: flex;
     align-items: center;
-}
-
-.sidebar {
     margin-top: 22vh;
 }
 
 .sidebar .player {
+    position: relative;
     font-weight: bold;
     font-size: 20px;
     min-width: 204px;
@@ -212,21 +214,49 @@ html, body {
     box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
 }
 
+.sidebar .player .turn-arrow {
+    position: absolute;
+    right: calc(100% - -12px);
+    height: 32px;
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.2));
+    animation: turn-arrow 2s ease-in-out infinite alternate;
+}
+
+@keyframes turn-arrow {
+    from {
+        transform: translateX(-2px);
+    }
+    to {
+        transform: translateX(2px);
+    }
+}
+
 .sidebar .player > .flex {
     display: flex;
     align-items: center;
 }
 
-.sidebar .player > .flex > img {
+.sidebar .player .avatar {
+    position: relative;
     border-radius: 50%;
     margin: 4px auto 4px 4px;
     height: 42px;
-    background-color: #d0dcff;
-    border: 2px solid #98b1fb;
+    width: 42px;
+    background-color: hsl(189, 90%, 33%);
+    padding: 2px;
     vertical-align: middle;
 }
 
-.sidebar .player > .flex > .name {
+.sidebar .player .avatar > img {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+}
+
+.sidebar .player .name {
     margin-left: calc(-48px + 10%);
     margin-right: auto;
 }
@@ -235,7 +265,6 @@ html, body {
 #hangman-container {
     display: flex;
     align-items: end;
-    margin-top: 22vh;
     margin-left: 22vw;
     margin-right: auto;
 }
@@ -260,6 +289,17 @@ html, body {
     border-radius: 6px;
 }
 
+.base, .pole1, .pole2, .pole3, .pole4, #body > div {
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.28);
+}
+
+.pole1 {
+    top: 2px;
+    left: 30px;
+    height: 120px;
+    width: 6px;
+}
+
 .pole2 {
     top: 2px;
     left: 30px;
@@ -274,11 +314,13 @@ html, body {
     width: 6px;
 }
 
-.pole1 {
-    top: 2px;
-    left: 30px;
-    height: 120px;
-    width: 6px;
+.pole4 {
+    top: 26px;
+    left: 35px;
+    height: 5px;
+    width: 37px;
+    transform: rotate(-45deg);
+    transform-origin: bottom left;
 }
 
 .base {
@@ -292,6 +334,18 @@ html, body {
     left: 65px;
     width: 50px;
     height: 80px;
+}
+
+.crown {
+    position: absolute;
+    width: 100%;
+    height: auto;
+    top: calc(-100% - -10px);
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    color: #ffc800;
+    filter: drop-shadow(0 -1px 3px rgba(0, 0, 0, 0.5));
 }
 
 #head {
@@ -367,6 +421,7 @@ html, body {
     width: 32px;
     margin-right: 16px;
     background-color: #f9f9f9;
+    box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.15);
 }
 
 .word-letter:after {
@@ -397,6 +452,11 @@ button {
     text-shadow: 0 0 2px rgba(0, 0, 0, 0.28);
     font-size: 20px;
     font-weight: bold;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.28);
+}
+
+input[disabled], input[disabled] ~ .shadow, button[disabled] {
+    opacity: 0.4;
 }
 
 .input-group {
@@ -405,6 +465,15 @@ button {
     margin-top: 10px;
     width: 50%;
     max-width: 328px;
+}
+
+.input-group .shadow {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 2px;
+    bottom: 0;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.28);
 }
 
 input {
@@ -447,7 +516,7 @@ input:focus {
     padding-bottom: 6px;
     font-weight: 700;
     border-width: 3px;
-    border-image: linear-gradient(to right, #11998e, #38ef7d);
+    border-image: linear-gradient(to right, hsl(189, 80%, 33%), hsl(189, 85%, 48%));
     border-image-slice: 1;
 }
 
@@ -456,8 +525,8 @@ input:focus ~ .input-label {
     top: 0;
     display: block;
     transition: 0.2s;
-    font-size: 1rem;
-    color: #11998e;
+    font-size: 1rem; /* hsl(189, 81%, 35%) */
+    color: hsl(189, 80%, 33%);
     font-weight: 700;
 }
 
