@@ -12,7 +12,6 @@ const app = new Vue({
     disableStartVote: false,
     players: [],
     player: {},
-    letters: [],
     lives: 6,
     totalLives: 6,
     overlay: {
@@ -93,7 +92,7 @@ const app = new Vue({
     // se tutte le lettere della parola sono state indovinate il gioco finisce
     // e il giocatore 2 vince
     checkHasWon() {
-      for (let l of this.letters) {
+      for (let l of this.gameInfo.letters) {
         if (!l.guessed) {
           return;
         }
@@ -222,21 +221,6 @@ const app = new Vue({
           console.log("Game Status: PLAYING");
           this.overlay.show = false;
           this.showLobby = false;
-
-          wordContainer.innerHTML = "";
-          this.letters = [];
-
-          for (let c of this.gameInfo.letters) {
-            let wordLetter = document.createElement("div");
-            wordLetter.classList.add("word-letter");
-
-            wordContainer.appendChild(wordLetter);
-            this.letters.push({
-              letter: c,
-              guessed: false,
-              element: wordLetter
-            });
-          }
           break;
         case 4:
           console.log("Game Status: ENDED");
@@ -289,7 +273,6 @@ Vue.component("toast", {
 });
 
 
-let wordContainer = document.getElementById("word-container");
 let keyboard = document.getElementById("keyboard");
 let guessForm = document.getElementById("guess-form");
 
@@ -301,37 +284,7 @@ let waist = document.getElementById("waist");
 let leftLeg = document.getElementById("left-leg");
 let rightLeg = document.getElementById("right-leg");
 
-// imposta il click per ogni lettera che può essere scelta
-// controlla se è presente nella parola,
-// se non è presente toglie una vita
-//
-// aggiorna le vite e chiama il controllo al gameover o win
-for (let letter of keyboard.childNodes) {
-  letter.addEventListener("click", () => {
-    if (letter.classList.contains("guessed")) {
-      return;
-    }
-    let c = letter.innerText.trim();
-    letter.classList.add("guessed");
 
-    let correct = false;
-
-    for (let l of letters) {
-      if (l.letter === c) {
-        correct = true;
-        l.guessed = true;
-        l.element.innerText = c;
-      }
-    }
-
-    if (!correct) {
-      lives--;
-      updateLives();
-    }
-    checkGameOver();
-    checkHasWon();
-  });
-}
 
 
 guessForm.addEventListener("submit", e => {

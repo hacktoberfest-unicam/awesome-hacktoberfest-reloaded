@@ -109,7 +109,9 @@
         </div>
       </div>
 
-      <div id="word-container"></div>
+      <div id="word-container">
+        <div v-for="l in (index, gameInfo.letters)" v-key="index" class="word-letter">{{ l.letter }}</div>
+      </div>
     </div>
     <div class="sidebar">
       <div v-for="player in players" :key="player.id" class="player">
