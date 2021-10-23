@@ -1,3 +1,7 @@
+import Game from "./modules/Game.js";
+import GameStatus from "./modules/GameStatus.js";
+import Player from "./modules/Player.js";
+
 // websocket
 let ws;
 
@@ -5,13 +9,11 @@ const app = new Vue({
   el: "#app",
   data: {
     alerts: [],
-    gameInfo: {
-      status: -1
-    },
+    gameInfo: new Game(),
     showLobby: false,
     disableStartVote: false,
     players: [],
-    player: {},
+    player: new Player(0),
     lives: 6,
     totalLives: 6,
     overlay: {
@@ -192,15 +194,15 @@ const app = new Vue({
     },
     updateGameInfo() {
       switch (this.gameInfo.status) {
-        case 0:
+        case GameStatus.LOBBY:
           console.log("Game Status: LOBBY");
           this.showLobby = true;
           this.disableStartVote = false;
           break;
-        case 1:
+        case GameStatus.VOTING_PLAYER:
           console.log("Game Status: VOTING_PLAYER");
           break;
-        case 2:
+        case GameStatus.CHOOSING_WORD:
           console.log("Game Status: CHOOSING_WORD");
 
           if (this.player.id === this.gameInfo.choser.id) {
@@ -217,12 +219,12 @@ const app = new Vue({
             this.openOverlay(this.gameInfo.choser.nickname, "sta scegliendo la parola...");
           }
           break;
-        case 3:
+        case GameStatus.PLAYING:
           console.log("Game Status: PLAYING");
           this.overlay.show = false;
           this.showLobby = false;
           break;
-        case 4:
+        case GameStatus.ENDED:
           console.log("Game Status: ENDED");
           break;
       }
@@ -232,6 +234,8 @@ const app = new Vue({
     this.connectWS();
   }
 });
+
+window.app = app;
 
 Vue.component("toast", {
   props: {

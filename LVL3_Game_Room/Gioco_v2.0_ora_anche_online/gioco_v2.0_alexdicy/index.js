@@ -1,9 +1,9 @@
 import express from "express";
 import WebSocket from "ws";
 
-import Player from "./Player.js";
-import GameStatus from "./GameStatus.js";
-import Game from "./Game.js";
+import Player from "./public/modules/Player.js";
+import GameStatus from "./public/modules/GameStatus.js";
+import Game from "./public/modules/Game.js";
 
 const app = express();
 // servi i file statici (il client del gioco)
