@@ -3,6 +3,7 @@
 int menu();
 int newGame(char* name1, char* name2);
 int move();
+
 int main() {
     int choice = menu();
     char player1[30], player2[30];
@@ -25,7 +26,7 @@ int menu(){
     printf("0. Exit\n");
 
     do{
-        printf("Enter a choice (0-2): ");
+        printf("Enter a choice (0-1): ");
         scanf("%d",&choice);
     }while(choice < 0 || choice > 1);
 
