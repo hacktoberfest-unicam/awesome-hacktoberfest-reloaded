@@ -9,6 +9,11 @@ const app = new Vue({
   el: "#app",
   data: {
     alerts: [],
+    overlay: {
+      show: false,
+      title: "",
+      content: ""
+    },
     gameInfo: new Game(),
     showLobby: false,
     disableStartVote: false,
@@ -16,11 +21,11 @@ const app = new Vue({
     player: new Player(0),
     lives: 6,
     totalLives: 6,
-    overlay: {
-      show: false,
-      title: "",
-      content: ""
-    }
+    keyboard: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'].map(c => {
+      return {
+        letter: c, guessed: false
+      }
+    })
   },
   methods: {
     alert(text, title = "Notification") {
@@ -287,8 +292,6 @@ let rightArm = document.getElementById("right-arm");
 let waist = document.getElementById("waist");
 let leftLeg = document.getElementById("left-leg");
 let rightLeg = document.getElementById("right-leg");
-
-
 
 
 guessForm.addEventListener("submit", e => {
