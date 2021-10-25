@@ -39,7 +39,7 @@
         </div>
       </div>
     </div>
-    <button @click="voteToStart" :disabled="disableStartVote || players.length < 2" id="start-vote">Vota per iniziare</button>
+    <button @click="voteToStart" :disabled="disableStartVote || players.length < 2" id="start-vote" class="button">Vota per iniziare</button>
   </div>
 
   <div id="overlay" v-if="overlay.show">
@@ -54,14 +54,15 @@
           <div class="shadow"></div>
           <label for="overlay-input" class="input-label">{{ overlay.input.label }}</label>
         </div>
-        <button @click="overlay.input.onSend">{{ overlay.input.buttonText }}</button>
+        <button @click="overlay.input.onSend" class="button">{{ overlay.input.buttonText }}</button>
       </div>
     </div>
   </div>
 
   <div class="main-container" v-if="!showLobby && !overlay.show">
     <div class="lives-container">
-      <div id="lives">{{ lives }}/{{ totalLives }}</div>
+      <div id="lives" v-if="game.lives >= 0">{{ game.lives }}/{{ game.totalLives }}</div>
+      <div id="lives" v-else>Game over</div>
       <img class="lives-heart" src="images/heart.png" alt="heart icon">
     </div>
 
@@ -130,7 +131,7 @@
         <div class="shadow"></div>
         <label for="guess-input" class="input-label">Parola</label>
       </form>
-      <button type="submit" form="guess-form" :disabled="player.id != game.turn.player">Indovina</button>
+      <button type="submit" class="button" form="guess-form" :disabled="player.id != game.turn.player">Indovina</button>
     </div>
   </div>
 </div>

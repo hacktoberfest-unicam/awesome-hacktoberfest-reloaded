@@ -80,44 +80,6 @@ const app = new Vue({
 
       this.send("CHOOSE_LETTER", {letter: key.letter});
     },
-    // aggiorna le parti del corpo dell'omino o chiude il gioco se non ha più vite
-    checkGameOver() {
-      if (this.lives < 0) {
-        this.openOverlay("GameOver, Giocatore 2");
-        return;
-      }
-      switch (this.lives) {
-        case 5:
-          head.classList.remove("hide");
-          break;
-        case 4:
-          neck.classList.remove("hide");
-          waist.classList.remove("hide");
-          break;
-        case 3:
-          leftArm.classList.remove("hide");
-          break;
-        case 2:
-          rightArm.classList.remove("hide");
-          break;
-        case 1:
-          leftLeg.classList.remove("hide");
-          break;
-        case 0:
-          rightLeg.classList.remove("hide");
-          break;
-      }
-    },
-    // se tutte le lettere della parola sono state indovinate il gioco finisce
-    // e il giocatore 2 vince
-    checkHasWon() {
-      for (let l of this.game.letters) {
-        if (!l.guessed) {
-          return;
-        }
-        this.openOverlay("Hai vinto, Giocatore 2");
-      }
-    },
     voteToStart() {
       // allow vote only if there is more than one player
       if (this.players.length > 1) {
@@ -241,6 +203,7 @@ const app = new Vue({
           break;
         case GameStatus.ENDED:
           console.log("Game Status: ENDED");
+          this.alert("Tra 5 secondi inizia una nuova partita...", "Il gioco è terminato");
           break;
       }
     },
@@ -302,7 +265,6 @@ Vue.component("toast", {
 });
 
 
-let keyboard = document.getElementById("keyboard");
 let guessForm = document.getElementById("guess-form");
 
 let head = document.getElementById("head");

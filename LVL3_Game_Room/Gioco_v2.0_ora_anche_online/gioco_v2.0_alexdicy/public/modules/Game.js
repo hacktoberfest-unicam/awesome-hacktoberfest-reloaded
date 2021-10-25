@@ -8,4 +8,7 @@ export default class Game {
   chooser = null;
   /** @type Turn */
   turn = new Turn();
+
+  lives = 6;
+  totalLives = this.lives;
 }

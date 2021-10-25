@@ -14,7 +14,7 @@ const server = app.listen(process.env.PORT || 80);
 const players = [];
 let nextPlayerId = 0;
 
-const game = new Game();
+let game = new Game();
 let turnIndex = 0;
 
 let votes = [];
@@ -94,7 +94,6 @@ ws.on("connection", client => {
             guessed: false,
           });
         }
-        game.status = GameStatus.PLAYING;
         let clientLetters = [];
         for (let l of wordLetters) {
           clientLetters.push({
@@ -103,7 +102,7 @@ ws.on("connection", client => {
           })
         }
         game.letters = clientLetters;
-        send("GAME", {game});
+        setGameStatus(GameStatus.PLAYING);
         break;
       case "CHOOSE_LETTER":
         // ignore if the player is not in the current turn or if the gameStatus is not correct
@@ -115,9 +114,11 @@ ws.on("connection", client => {
           return;
         }
 
+        let correct = false;
         // check if the letter is in the chosen word
         for (let i = 0; i < wordLetters.length; i++) {
           if (wordLetters[i].letter === letter) {
+            correct = true;
             wordLetters[i].guessed = true;
             game.letters[i].letter = wordLetters[i].letter;
             game.letters[i].guessed = true;
@@ -130,18 +131,18 @@ ws.on("connection", client => {
             break;
           }
         }
+
+        if (!correct) {
+          game.lives--;
+        }
+        // change turn
+        nextTurn();
         // send updated keyboard
         send("KEYBOARD", {keyboard});
         // send updated word
         send("GAME", {game});
-
-        // TODO implement logic
-        //if (!correct) {
-        //  lives--;
-        //  updateLives();
-        //}
-        //checkGameOver();
-        //checkHasWon();
+        // check if game has ended
+        checkGame();
         break;
     }
   });
@@ -202,13 +203,7 @@ function removePlayer(id) {
       }
 
       if (players.length <= 2) {
-        game.status = GameStatus.LOBBY;
-        game.letters = [];
-        game.chooser = null
-        turnIndex = 0;
-        wordLetters = [];
-        votes = [];
-        send("GAME", {game});
+        resetGame();
       }
       break;
     }
@@ -226,13 +221,20 @@ function getDefaultKeyboard() {
 function startGame() {
   console.log("Game is starting");
   keyboard = getDefaultKeyboard();
-  game.status = GameStatus.CHOOSING_WORD;
   // choose a random player
   game.chooser = players[Math.floor(Math.random() * players.length)];
   console.log(`Player "${game.chooser.nickname}" (${game.chooser.id}) is the word chooser`);
   // turn settings
   nextTurn();
   send("KEYBOARD", {keyboard});
+  setGameStatus(GameStatus.CHOOSING_WORD);
+}
+
+function resetGame() {
+  game = new Game();
+  turnIndex = 0;
+  wordLetters = [];
+  votes = [];
   send("GAME", {game});
 }
 
@@ -246,6 +248,34 @@ function nextTurn() {
     return;
   }
   game.turn.player = player.id;
+}
+
+function checkGame() {
+  // check if all letters have been guessed
+  for (let l of wordLetters) {
+    if (!l.guessed) {
+      // missing a letter
+      // check if it's gameover
+      if (game.lives < 0) {
+        setGameStatus(GameStatus.ENDED);
+        // reset game after 5 seconds
+        setTimeout(resetGame, 5000);
+      }
+      return;
+    }
+  }
+  // all letters have been guessed
+  setGameStatus(GameStatus.ENDED);
+  // reset game after 5 seconds
+  setTimeout(resetGame, 5000);
+}
+
+/**
+ * @param {number} status
+ */
+function setGameStatus(status) {
+  game.status = status;
+  send("GAME", {game});
 }
 
 function send(type, data = {}, client = null) {
