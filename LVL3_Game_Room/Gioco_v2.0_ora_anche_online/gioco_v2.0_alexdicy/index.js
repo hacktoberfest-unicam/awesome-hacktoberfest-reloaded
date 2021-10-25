@@ -204,8 +204,18 @@ function removePlayer(id) {
 
       if (players.length <= 2) {
         resetGame();
+        return;
       }
-      break;
+      // change turn if needed
+      if (game.turn.player === id) {
+        nextTurn();
+        return;
+      }
+      // reset game if this player is the word chooser
+      if (game.status === GameStatus.CHOOSING_WORD && game.chooser.id === id) {
+        resetGame();
+      }
+      return;
     }
   }
 }
@@ -231,6 +241,7 @@ function startGame() {
 }
 
 function resetGame() {
+  console.log("Game is resetting");
   game = new Game();
   turnIndex = 0;
   wordLetters = [];

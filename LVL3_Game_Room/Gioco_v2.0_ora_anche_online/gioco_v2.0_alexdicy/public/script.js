@@ -17,8 +17,9 @@ const app = new Vue({
     game: new Game(),
     showLobby: false,
     disableStartVote: false,
+    hasJoined: false,
     players: [],
-    player: new Player(0),
+    player: new Player(-1),
     lives: 6,
     totalLives: 6,
     keyboard: []
@@ -110,32 +111,17 @@ const app = new Vue({
       const secure = window.location.protocol !== "http:";
       ws = new WebSocket((secure ? "wss://" : "ws://") + window.location.host);
       ws.addEventListener("error", () => {
+        this.hasJoined = false;
         this.alert("Errore di connessione al server");
       });
       ws.addEventListener("close", () => {
+        this.hasJoined = false;
         this.alert("Disconnesso dal server, mi sto riconnettendo");
         setTimeout(this.connectWS, 1000);
       });
       ws.addEventListener("open", () => {
-        // chiedi al giocatore di inserire il proprio nickname
-        this.openOverlay("Scegli il tuo nickname:", null, {
-          value: "",
-          placeholder: "Pippo",
-          label: "Nickname",
-          required: true,
-          minLength: 2,
-          buttonText: "Entra",
-          onSend: () => {
-            let nickname = this.overlay.input.value.trim();
-            if (nickname.length < 2) {
-              this.alert("Il nickname deve essere lungo 2 o più caratteri", "Riprova");
-              this.$refs.overlayInput.focus();
-              return;
-            }
-
-            this.send("JOIN", {nickname});
-          }
-        });
+        this.hasJoined = false;
+        console.log("Connected to Websocket");
       });
       ws.addEventListener("message", m => {
         let message = JSON.parse(m.data);
@@ -151,6 +137,9 @@ const app = new Vue({
             break;
           case "GAME":
             this.game = message.game;
+            if (!this.hasJoined) {
+              this.handleGameStatus();
+            }
             break;
           case "KEYBOARD":
             this.keyboard = message.keyboard;
@@ -159,6 +148,7 @@ const app = new Vue({
             console.log("Joined successfully");
             this.player = message.player;
             this.overlay.show = false;
+            this.hasJoined = true;
             break;
           case "PLAYER_INFO":
             this.player = message.player;
@@ -169,12 +159,39 @@ const app = new Vue({
         }
       });
     },
+    askNickname() {
+      console.log("Asking for a nickname");
+      // chiedi al giocatore di inserire il proprio nickname
+      this.openOverlay("Scegli il tuo nickname:", null, {
+        value: "",
+        placeholder: "Pippo",
+        label: "Nickname",
+        required: true,
+        minLength: 2,
+        buttonText: "Entra",
+        onSend: () => {
+          let nickname = this.overlay.input.value.trim();
+          if (nickname.length < 2) {
+            this.alert("Il nickname deve essere lungo 2 o più caratteri", "Riprova");
+            this.$refs.overlayInput.focus();
+            return;
+          }
+
+          this.send("JOIN", {nickname});
+        }
+      });
+    },
     handleGameStatus() {
       switch (this.game.status) {
         case GameStatus.LOBBY:
           console.log("Game Status: LOBBY");
           this.showLobby = true;
           this.disableStartVote = false;
+          if (this.hasJoined) {
+            this.overlay.show = false;
+          } else {
+            this.askNickname();
+          }
           break;
         case GameStatus.VOTING_PLAYER:
           console.log("Game Status: VOTING_PLAYER");
@@ -215,6 +232,11 @@ const app = new Vue({
   watch: {
     "game.status"() {
       this.handleGameStatus();
+    },
+    "game.turn.player"() {
+      if (this.game.turn.player === this.player.id) {
+        this.alert("Scegli una lettera o prova ad indovinare", "È il tuo turno!");
+      }
     }
   },
   mounted() {
