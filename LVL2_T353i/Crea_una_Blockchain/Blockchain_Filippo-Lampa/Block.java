@@ -20,7 +20,10 @@ public class Block {
     }
 
     private String calculateBlockHash() {
-        String dataToHash = timeStamp + data + nonce;
+        String dataToHash;
+        if(previousBlock != null)
+            dataToHash = timeStamp + data + nonce + previousBlock.hash;
+        else dataToHash = timeStamp + data + nonce;
         MessageDigest digest;
         byte[] bytes = null;
         try {
