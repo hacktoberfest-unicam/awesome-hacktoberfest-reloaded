@@ -14,18 +14,14 @@ const app = new Vue({
       title: "",
       content: ""
     },
-    gameInfo: new Game(),
+    game: new Game(),
     showLobby: false,
     disableStartVote: false,
     players: [],
     player: new Player(0),
     lives: 6,
     totalLives: 6,
-    keyboard: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'].map(c => {
-      return {
-        letter: c, guessed: false
-      }
-    })
+    keyboard: []
   },
   methods: {
     alert(text, title = "Notification") {
@@ -56,17 +52,33 @@ const app = new Vue({
       let word = this.overlay.input.value.trim().toUpperCase();
       if (word.length < 2 || word.includes(" ")) {
         this.alert("La parola deve essere lunga 2 o più caratteri e non deve contenere spazi", "Errore");
-        input.focus();
+        this.overlay.input.focus();
         return;
       }
       if (!/^[a-zA-Z]+$/.test(word)) {
         this.alert("La parola deve contenere solo lettere", "Errore");
-        input.focus();
+        this.overlay.input.focus();
         return;
       }
 
       this.send("CHOOSE_WORD", {word});
       this.closeOverlay();
+    },
+    keyClick(key) {
+      if (key.guessed || this.game.turn.player !== this.player.id) {
+        return;
+      }
+      this.game.turn.player = -1; // block everything
+      // revert after 5 seconds
+      setTimeout(() => {
+        if (this.game.turn.player === -1) {
+          this.game.turn.player = this.player.id;
+        }
+      }, 5000);
+
+      key.guessed = true;
+
+      this.send("CHOOSE_LETTER", {letter: key.letter});
     },
     // aggiorna le parti del corpo dell'omino o chiude il gioco se non ha più vite
     checkGameOver() {
@@ -99,7 +111,7 @@ const app = new Vue({
     // se tutte le lettere della parola sono state indovinate il gioco finisce
     // e il giocatore 2 vince
     checkHasWon() {
-      for (let l of this.gameInfo.letters) {
+      for (let l of this.game.letters) {
         if (!l.guessed) {
           return;
         }
@@ -176,8 +188,10 @@ const app = new Vue({
             console.log(message.log);
             break;
           case "GAME":
-            this.gameInfo = message;
-            this.updateGameInfo();
+            this.game = message.game;
+            break;
+          case "KEYBOARD":
+            this.keyboard = message.keyboard;
             break;
           case "JOINED":
             console.log("Joined successfully");
@@ -193,12 +207,8 @@ const app = new Vue({
         }
       });
     },
-    send(type, data = {}) {
-      data.type = type;
-      ws.send(JSON.stringify(data));
-    },
-    updateGameInfo() {
-      switch (this.gameInfo.status) {
+    handleGameStatus() {
+      switch (this.game.status) {
         case GameStatus.LOBBY:
           console.log("Game Status: LOBBY");
           this.showLobby = true;
@@ -210,7 +220,7 @@ const app = new Vue({
         case GameStatus.CHOOSING_WORD:
           console.log("Game Status: CHOOSING_WORD");
 
-          if (this.player.id === this.gameInfo.chooser.id) {
+          if (this.player.id === this.game.chooser.id) {
             this.openOverlay(this.player.nickname + ", scegli una parola:", null, {
               value: "",
               placeholder: "Topolino",
@@ -221,7 +231,7 @@ const app = new Vue({
               onSend: this.sendWord
             });
           } else {
-            this.openOverlay(this.gameInfo.chooser.nickname, "sta scegliendo la parola...");
+            this.openOverlay(this.game.chooser.nickname, "sta scegliendo la parola...");
           }
           break;
         case GameStatus.PLAYING:
@@ -233,9 +243,19 @@ const app = new Vue({
           console.log("Game Status: ENDED");
           break;
       }
+    },
+    send(type, data = {}) {
+      data.type = type;
+      ws.send(JSON.stringify(data));
+    }
+  },
+  watch: {
+    "game.status"() {
+      this.handleGameStatus();
     }
   },
   mounted() {
+    this.handleGameStatus();
     this.connectWS();
   }
 });

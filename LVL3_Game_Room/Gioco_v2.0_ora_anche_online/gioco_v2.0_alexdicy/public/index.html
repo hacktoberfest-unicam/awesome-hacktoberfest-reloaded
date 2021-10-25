@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--suppress EqualityComparisonWithCoercionJS, HtmlUnknownAttribute, HtmlUnknownTag -->
 <html lang="it">
 <head>
   <title>Gioco dell'impiccato</title>
@@ -58,75 +59,79 @@
     </div>
   </div>
 
-  <div class="lives-container">
-    <div id="lives">{{ lives }}/{{ totalLives }}</div>
-    <img class="lives-heart" src="images/heart.png">
-  </div>
-
-  <!--<div class="bottom-info-container">
-  <div id="connected-players"></div>
-</div>-->
-
-  <div id="keyboard" :class="{'other-turn': player.id != gameInfo.turn.player}">
-    <div v-for="k in keyboard" class="letter" :class="{guessed: k.guessed}">{{ k.letter }}</div>
-  </div>
-
-  <div class="main-container">
-    <div id="hangman-container">
-      <div id="hangman">
-        <div class="pole1 v-line absolute"></div>
-        <div class="pole3 v-line absolute"></div>
-        <div class="pole2 h-line absolute"></div>
-        <div class="pole4 h-line absolute"></div>
-        <div class="base h-line absolute"></div>
-
-        <div id="body" class="absolute">
-          <div id="head" class="absolute hide"></div>
-          <div id="neck" class="absolute hide"></div>
-          <div id="left-arm" class="absolute hide"></div>
-          <div id="right-arm" class="absolute hide"></div>
-          <div id="waist" class="absolute hide"></div>
-          <div id="left-leg" class="absolute hide"></div>
-          <div id="right-leg" class="absolute hide"></div>
-        </div>
-      </div>
-
-      <div id="word-container">
-        <div v-for="(letter, index) in gameInfo.letters" :key="index" class="word-letter">{{ letter.letter }}</div>
-      </div>
+  <div class="main-container" v-if="!showLobby && !overlay.show">
+    <div class="lives-container">
+      <div id="lives">{{ lives }}/{{ totalLives }}</div>
+      <img class="lives-heart" src="images/heart.png" alt="heart icon">
     </div>
-    <div class="sidebar">
-      <div v-for="p in players" :key="p.id" class="player" :class="{me: p.id == player.id}">
-        <img class="turn-arrow" v-if="p.id == gameInfo.turn.player" src="images/turn-arrow.svg" alt="Current turn">
-        <div class="flex">
-          <div class="avatar">
-            <svg class="crown" v-if="gameInfo.chooser && p.id == gameInfo.chooser.id" xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-              <g transform="translate(128 128) scale(1.21 1.21)" style="">
-                <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;"
-                   transform="translate(-104.85 -104.85) scale(2.33 2.33)">
-                  <path
-                      d="M 78.517 77.617 H 11.483 c -0.951 0 -1.77 -0.669 -1.959 -1.601 L 0.041 29.542 c -0.159 -0.778 0.157 -1.576 0.806 -2.034 c 0.648 -0.459 1.506 -0.489 2.186 -0.079 l 25.585 15.421 l 14.591 -29.358 c 0.335 -0.674 1.021 -1.104 1.774 -1.11 c 0.709 -0.003 1.445 0.411 1.792 1.08 l 15.075 29.1 L 86.968 27.43 c 0.681 -0.41 1.537 -0.379 2.186 0.079 s 0.965 1.256 0.807 2.034 l -9.483 46.474 C 80.286 76.948 79.467 77.617 78.517 77.617 z"
-                      fill="currentColor"
-                      style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill-rule: nonzero; opacity: 1;"
-                      transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round"/>
-                </g>
-              </g>
-            </svg>
-            <img src="images/player-avatar.svg" alt="">
+
+    <!--
+    <div class="bottom-info-container">
+      <div id="connected-players"></div>
+    </div>
+    -->
+
+    <div id="keyboard" :class="{'other-turn': player.id != game.turn.player}">
+      <div v-for="key in keyboard" @click="keyClick(key)" class="letter" :class="{guessed: key.guessed}">{{ key.letter }}</div>
+    </div>
+
+    <div class="middle-container">
+      <div id="hangman-container">
+        <div id="hangman">
+          <div class="pole1 v-line absolute"></div>
+          <div class="pole3 v-line absolute"></div>
+          <div class="pole2 h-line absolute"></div>
+          <div class="pole4 h-line absolute"></div>
+          <div class="base h-line absolute"></div>
+
+          <div id="body" class="absolute">
+            <div id="head" class="absolute hide"></div>
+            <div id="neck" class="absolute hide"></div>
+            <div id="left-arm" class="absolute hide"></div>
+            <div id="right-arm" class="absolute hide"></div>
+            <div id="waist" class="absolute hide"></div>
+            <div id="left-leg" class="absolute hide"></div>
+            <div id="right-leg" class="absolute hide"></div>
           </div>
-          <div class="name">{{ p.nickname }}</div>
+        </div>
+
+        <div id="word-container">
+          <div v-for="(letter, index) in game.letters" :key="index" class="word-letter">{{ letter.letter }}</div>
+        </div>
+      </div>
+      <div class="sidebar">
+        <div v-for="p in players" :key="p.id" class="player" :class="{me: p.id == player.id}">
+          <img class="turn-arrow" v-if="p.id == game.turn.player" src="images/turn-arrow.svg" alt="Current turn">
+          <div class="flex">
+            <div class="avatar">
+              <svg class="crown" v-if="game.chooser && p.id == game.chooser.id" xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+                <g transform="translate(128 128) scale(1.21 1.21)" style="">
+                  <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;"
+                     transform="translate(-104.85 -104.85) scale(2.33 2.33)">
+                    <path
+                        d="M 78.517 77.617 H 11.483 c -0.951 0 -1.77 -0.669 -1.959 -1.601 L 0.041 29.542 c -0.159 -0.778 0.157 -1.576 0.806 -2.034 c 0.648 -0.459 1.506 -0.489 2.186 -0.079 l 25.585 15.421 l 14.591 -29.358 c 0.335 -0.674 1.021 -1.104 1.774 -1.11 c 0.709 -0.003 1.445 0.411 1.792 1.08 l 15.075 29.1 L 86.968 27.43 c 0.681 -0.41 1.537 -0.379 2.186 0.079 s 0.965 1.256 0.807 2.034 l -9.483 46.474 C 80.286 76.948 79.467 77.617 78.517 77.617 z"
+                        fill="currentColor"
+                        style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill-rule: nonzero; opacity: 1;"
+                        transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round"/>
+                  </g>
+                </g>
+              </svg>
+              <img src="images/player-avatar.svg" alt="">
+            </div>
+            <div class="name">{{ p.nickname }}</div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="flex" style="margin-top: 120px">
-    <form id="guess-form" class="input-group">
-      <input type="text" id="guess-input" required placeholder=" " :disabled="player.id != gameInfo.turn.player" autocomplete="off">
-      <div class="shadow"></div>
-      <label for="guess-input" class="input-label">Parola</label>
-    </form>
-    <button type="submit" form="guess-form" :disabled="player.id != gameInfo.turn.player">Indovina</button>
+    <div class="flex" style="margin-top: 120px">
+      <form id="guess-form" class="input-group">
+        <input type="text" id="guess-input" required placeholder=" " :disabled="player.id != game.turn.player" autocomplete="off">
+        <div class="shadow"></div>
+        <label for="guess-input" class="input-label">Parola</label>
+      </form>
+      <button type="submit" form="guess-form" :disabled="player.id != game.turn.player">Indovina</button>
+    </div>
   </div>
 </div>
 

@@ -20,7 +20,9 @@ let turnIndex = 0;
 let votes = [];
 
 // contains the current word
-let letters = [];
+let wordLetters = [];
+// available letters to choose from
+let keyboard = [];
 
 // abilita il server websocket
 const ws = new WebSocket.Server({noServer: true});
@@ -45,11 +47,11 @@ ws.on("connection", client => {
     switch (data.type) {
       case "JOIN":
         if (game.status === GameStatus.PLAYING) {
-          break;
+          return;
         }
         let nickname = data.nickname.trim();
         if (nickname.length < 2) {
-          break;
+          return;
         }
         // remove if already present
         removePlayer(client.playerId);
@@ -73,31 +75,73 @@ ws.on("connection", client => {
         }
         break;
       case "CHOOSE_WORD":
+        // ignore if the player is not the chooser or if the gameStatus is not correct
+        if (game.status !== GameStatus.CHOOSING_WORD || game.chooser.id !== player.id) {
+          return;
+        }
         let word = data.word.trim().toUpperCase();
         if (word.length < 2 || word.includes(" ")) {
-          break;
+          return;
         }
         if (!/^[a-zA-Z]+$/.test(word)) {
-          break;
+          return;
         }
-        letters = [];
+        wordLetters = [];
 
         for (let c of word) {
-          letters.push({
+          wordLetters.push({
             letter: c,
             guessed: false,
           });
         }
         game.status = GameStatus.PLAYING;
         let clientLetters = [];
-        for (let l of letters) {
+        for (let l of wordLetters) {
           clientLetters.push({
             letter: "",
             guessed: false,
           })
         }
         game.letters = clientLetters;
-        send("GAME", game);
+        send("GAME", {game});
+        break;
+      case "CHOOSE_LETTER":
+        // ignore if the player is not in the current turn or if the gameStatus is not correct
+        if (game.status !== GameStatus.PLAYING || game.turn.player !== player.id) {
+          return;
+        }
+        let letter = data.letter;
+        if (!/^[A-Z]$/.test(letter)) {
+          return;
+        }
+
+        // check if the letter is in the chosen word
+        for (let i = 0; i < wordLetters.length; i++) {
+          if (wordLetters[i].letter === letter) {
+            wordLetters[i].guessed = true;
+            game.letters[i].letter = wordLetters[i].letter;
+            game.letters[i].guessed = true;
+          }
+        }
+
+        for (let key of keyboard) {
+          if (key.letter === letter) {
+            key.guessed = true;
+            break;
+          }
+        }
+        // send updated keyboard
+        send("KEYBOARD", {keyboard});
+        // send updated word
+        send("GAME", {game});
+
+        // TODO implement logic
+        //if (!correct) {
+        //  lives--;
+        //  updateLives();
+        //}
+        //checkGameOver();
+        //checkHasWon();
         break;
     }
   });
@@ -108,7 +152,8 @@ ws.on("connection", client => {
 
   send("WELCOME", {}, client);
   // broadcast game info and players
-  send("GAME", game);
+  send("KEYBOARD", {keyboard});
+  send("GAME", {game});
   send("PLAYER_INFO", {player}, client);
   send("PLAYERS", {players}, client);
 
@@ -161,24 +206,34 @@ function removePlayer(id) {
         game.letters = [];
         game.chooser = null
         turnIndex = 0;
-        letters = [];
+        wordLetters = [];
         votes = [];
-        send("GAME", game);
+        send("GAME", {game});
       }
       break;
     }
   }
 }
 
+function getDefaultKeyboard() {
+  return ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'].map(c => {
+    return {
+      letter: c, guessed: false
+    }
+  });
+}
+
 function startGame() {
   console.log("Game is starting");
+  keyboard = getDefaultKeyboard();
   game.status = GameStatus.CHOOSING_WORD;
   // choose a random player
   game.chooser = players[Math.floor(Math.random() * players.length)];
   console.log(`Player "${game.chooser.nickname}" (${game.chooser.id}) is the word chooser`);
   // turn settings
   nextTurn();
-  send("GAME", game);
+  send("KEYBOARD", {keyboard});
+  send("GAME", {game});
 }
 
 function nextTurn() {
