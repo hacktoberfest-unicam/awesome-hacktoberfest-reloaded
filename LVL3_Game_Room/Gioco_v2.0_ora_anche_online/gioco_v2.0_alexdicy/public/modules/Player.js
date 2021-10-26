@@ -2,6 +2,8 @@ export default class Player {
   /** @type number */
   id;
 
+  nickname = "";
+
   /**
    * @param {number} id
    */

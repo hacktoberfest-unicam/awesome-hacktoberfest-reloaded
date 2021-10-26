@@ -61,8 +61,8 @@
 
   <div class="main-container" v-if="!showLobby && !overlay.show">
     <div class="lives-container">
-      <div id="lives" v-if="game.lives >= 0">{{ game.lives }}/{{ game.totalLives }}</div>
-      <div id="lives" v-else>Game over</div>
+      <div class="lives" v-if="game.lives >= 0">{{ game.lives }}/{{ game.totalLives }}</div>
+      <div class="lives" v-else>Game over</div>
       <img class="lives-heart" src="images/heart.png" alt="heart icon">
     </div>
 
@@ -86,13 +86,13 @@
           <div class="base h-line absolute"></div>
 
           <div id="body" class="absolute">
-            <div id="head" class="absolute hide"></div>
-            <div id="neck" class="absolute hide"></div>
-            <div id="left-arm" class="absolute hide"></div>
-            <div id="right-arm" class="absolute hide"></div>
-            <div id="waist" class="absolute hide"></div>
-            <div id="left-leg" class="absolute hide"></div>
-            <div id="right-leg" class="absolute hide"></div>
+            <div v-if="game.lives < game.totalLives" id="head" class="absolute"></div>
+            <div v-if="game.lives < game.totalLives - 1" id="neck" class="absolute"></div>
+            <div v-if="game.lives < game.totalLives - 1" id="waist" class="absolute"></div>
+            <div v-if="game.lives < game.totalLives - 2" id="left-arm" class="absolute"></div>
+            <div v-if="game.lives < game.totalLives - 3" id="right-arm" class="absolute"></div>
+            <div v-if="game.lives < game.totalLives - 4" id="left-leg" class="absolute"></div>
+            <div v-if="game.lives < game.totalLives - 5" id="right-leg" class="absolute"></div>
           </div>
         </div>
 
@@ -103,6 +103,9 @@
       <div class="sidebar">
         <div v-for="p in players" :key="p.id" class="player" :class="{me: p.id == player.id}">
           <img class="turn-arrow" v-if="p.id == game.turn.player" src="images/turn-arrow.svg" alt="Current turn">
+          <div class="current-turn" v-if="p.id == player.id && p.id == game.turn.player">
+            È il tuo turno
+          </div>
           <div class="flex">
             <div class="avatar">
               <svg class="crown" v-if="game.chooser && p.id == game.chooser.id" xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">

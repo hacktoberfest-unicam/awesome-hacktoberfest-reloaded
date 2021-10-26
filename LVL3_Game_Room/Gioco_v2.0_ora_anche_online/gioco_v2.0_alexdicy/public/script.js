@@ -20,8 +20,6 @@ const app = new Vue({
     hasJoined: false,
     players: [],
     player: new Player(-1),
-    lives: 6,
-    totalLives: 6,
     keyboard: []
   },
   methods: {
@@ -138,7 +136,7 @@ const app = new Vue({
           case "GAME":
             this.game = message.game;
             if (!this.hasJoined) {
-              this.handleGameStatus();
+              this.askNickname();
             }
             break;
           case "KEYBOARD":
@@ -189,8 +187,6 @@ const app = new Vue({
           this.disableStartVote = false;
           if (this.hasJoined) {
             this.overlay.show = false;
-          } else {
-            this.askNickname();
           }
           break;
         case GameStatus.VOTING_PLAYER:
@@ -233,11 +229,11 @@ const app = new Vue({
     "game.status"() {
       this.handleGameStatus();
     },
-    "game.turn.player"() {
-      if (this.game.turn.player === this.player.id) {
-        this.alert("Scegli una lettera o prova ad indovinare", "È il tuo turno!");
-      }
-    }
+    //"game.turn.player"() {
+    //  if (this.game.turn.player === this.player.id) {
+    //    this.alert("Scegli una lettera o prova ad indovinare", "È il tuo turno!");
+    //  }
+    //}
   },
   mounted() {
     this.handleGameStatus();

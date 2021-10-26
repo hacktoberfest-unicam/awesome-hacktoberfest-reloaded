@@ -27,138 +27,154 @@ let keyboard = [];
 // abilita il server websocket
 const ws = new WebSocket.Server({noServer: true});
 ws.on("connection", client => {
-  if (nextPlayerId >= Number.MAX_SAFE_INTEGER) {
-    nextPlayerId = 0;
-  }
-  let player = new Player(nextPlayerId);
-
-  // heartbeat
-  client.isAlive = true;
-  client.on("pong", () => {
-    client.isAlive = true;
-  });
-  client.on("close", () => {
-    removePlayer(client.playerId);
-  });
-  client.on("message", message => {
-    console.log("--->", message, player);
-
-    let data = JSON.parse(message);
-    switch (data.type) {
-      case "JOIN":
-        if (game.status === GameStatus.PLAYING) {
-          return;
-        }
-        let nickname = data.nickname.trim();
-        if (nickname.length < 2) {
-          return;
-        }
-        // remove if already present
-        removePlayer(client.playerId);
-
-        player.nickname = nickname;
-        players.push(player);
-        send("JOINED", {player}, client);
-        send("PLAYERS", {players});
-        break;
-      case "START_VOTE":
-        // do not count votes if they're the only player connected
-        // or if the game is not in a lobby state
-        if (game.status !== GameStatus.LOBBY || players.length < 2) {
-          return;
-        }
-        if (!votes.includes(player.id)) {
-          votes.push(player.id);
-        }
-        if (votes.length > players.length / 2) {
-          startGame();
-        }
-        break;
-      case "CHOOSE_WORD":
-        // ignore if the player is not the chooser or if the gameStatus is not correct
-        if (game.status !== GameStatus.CHOOSING_WORD || game.chooser.id !== player.id) {
-          return;
-        }
-        let word = data.word.trim().toUpperCase();
-        if (word.length < 2 || word.includes(" ")) {
-          return;
-        }
-        if (!/^[a-zA-Z]+$/.test(word)) {
-          return;
-        }
-        wordLetters = [];
-
-        for (let c of word) {
-          wordLetters.push({
-            letter: c,
-            guessed: false,
-          });
-        }
-        let clientLetters = [];
-        for (let l of wordLetters) {
-          clientLetters.push({
-            letter: "",
-            guessed: false,
-          })
-        }
-        game.letters = clientLetters;
-        setGameStatus(GameStatus.PLAYING);
-        break;
-      case "CHOOSE_LETTER":
-        // ignore if the player is not in the current turn or if the gameStatus is not correct
-        if (game.status !== GameStatus.PLAYING || game.turn.player !== player.id) {
-          return;
-        }
-        let letter = data.letter;
-        if (!/^[A-Z]$/.test(letter)) {
-          return;
-        }
-
-        let correct = false;
-        // check if the letter is in the chosen word
-        for (let i = 0; i < wordLetters.length; i++) {
-          if (wordLetters[i].letter === letter) {
-            correct = true;
-            wordLetters[i].guessed = true;
-            game.letters[i].letter = wordLetters[i].letter;
-            game.letters[i].guessed = true;
-          }
-        }
-
-        for (let key of keyboard) {
-          if (key.letter === letter) {
-            key.guessed = true;
-            break;
-          }
-        }
-
-        if (!correct) {
-          game.lives--;
-        }
-        // change turn
-        nextTurn();
-        // send updated keyboard
-        send("KEYBOARD", {keyboard});
-        // send updated word
-        send("GAME", {game});
-        // check if game has ended
-        checkGame();
-        break;
+  try {
+    if (nextPlayerId >= Number.MAX_SAFE_INTEGER) {
+      nextPlayerId = 0;
     }
-  });
+    let player = new Player(nextPlayerId);
 
-  // login player
-  console.log("New client connected, ID: " + nextPlayerId);
-  client.playerId = nextPlayerId;
+    // heartbeat
+    client.isAlive = true;
+    client.on("pong", () => {
+      client.isAlive = true;
+    });
+    client.on("close", () => {
+      removePlayer(client.playerId);
+    });
+    client.on("message", message => {
+      console.log("--->", message, player);
 
-  send("WELCOME", {}, client);
-  // broadcast game info and players
-  send("KEYBOARD", {keyboard});
-  send("GAME", {game});
-  send("PLAYER_INFO", {player}, client);
-  send("PLAYERS", {players}, client);
+      try {
+        let data = JSON.parse(message);
+        switch (data.type) {
+          case "JOIN":
+            if (game.status === GameStatus.PLAYING) {
+              return;
+            }
+            let nickname = data.nickname.trim();
+            if (nickname.length < 2) {
+              return;
+            }
+            // check if already present, use their info if present
+            for (let i = 0; i < players.length; i++) {
+              let p = players[i];
+              if (client.playerId === p.id) {
+                player = p;
+                break;
+              }
+            }
+            // remove if already present
+            removePlayer(client.playerId);
 
-  nextPlayerId++;
+            player.nickname = nickname;
+            players.push(player);
+            send("JOINED", {player}, client);
+            send("PLAYERS", {players});
+            break;
+          case "START_VOTE":
+            // do not count votes if they're the only player connected
+            // or if the game is not in a lobby state
+            if (game.status !== GameStatus.LOBBY || players.length < 2) {
+              return;
+            }
+            if (!votes.includes(player.id)) {
+              votes.push(player.id);
+            }
+            if (votes.length > players.length / 2) {
+              startGame();
+            }
+            break;
+          case "CHOOSE_WORD":
+            // ignore if the player is not the chooser or if the gameStatus is not correct
+            if (game.status !== GameStatus.CHOOSING_WORD || game.chooser.id !== player.id) {
+              return;
+            }
+            let word = data.word.trim().toUpperCase();
+            if (word.length < 2 || word.includes(" ")) {
+              return;
+            }
+            if (!/^[a-zA-Z]+$/.test(word)) {
+              return;
+            }
+            wordLetters = [];
+
+            for (let c of word) {
+              wordLetters.push({
+                letter: c,
+                guessed: false,
+              });
+            }
+            let clientLetters = [];
+            for (let l of wordLetters) {
+              clientLetters.push({
+                letter: "",
+                guessed: false,
+              })
+            }
+            game.letters = clientLetters;
+            setGameStatus(GameStatus.PLAYING);
+            break;
+          case "CHOOSE_LETTER":
+            // ignore if the player is not in the current turn or if the gameStatus is not correct
+            if (game.status !== GameStatus.PLAYING || game.turn.player !== player.id) {
+              return;
+            }
+            let letter = data.letter;
+            if (!/^[A-Z]$/.test(letter)) {
+              return;
+            }
+
+            let correct = false;
+            // check if the letter is in the chosen word
+            for (let i = 0; i < wordLetters.length; i++) {
+              if (wordLetters[i].letter === letter) {
+                correct = true;
+                wordLetters[i].guessed = true;
+                game.letters[i].letter = wordLetters[i].letter;
+                game.letters[i].guessed = true;
+              }
+            }
+
+            for (let key of keyboard) {
+              if (key.letter === letter) {
+                key.guessed = true;
+                break;
+              }
+            }
+
+            if (!correct) {
+              game.lives--;
+            }
+            // change turn
+            nextTurn();
+            // send updated keyboard
+            send("KEYBOARD", {keyboard});
+            // send updated word
+            send("GAME", {game});
+            // check if game has ended
+            checkGame();
+            break;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
+    // login player
+    console.log("New client connected, ID: " + nextPlayerId);
+    client.playerId = nextPlayerId;
+
+    send("WELCOME", {}, client);
+    // broadcast game info and players
+    send("KEYBOARD", {keyboard}, client);
+    send("GAME", {game}, client);
+    send("PLAYER_INFO", {player}, client);
+    send("PLAYERS", {players}, client);
+
+    nextPlayerId++;
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 // gestisci i websocket tramite express
