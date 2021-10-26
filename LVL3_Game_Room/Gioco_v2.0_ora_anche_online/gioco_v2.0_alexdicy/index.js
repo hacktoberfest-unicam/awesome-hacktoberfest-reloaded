@@ -106,10 +106,7 @@ ws.on("connection", client => {
             }
             let clientLetters = [];
             for (let l of wordLetters) {
-              clientLetters.push({
-                letter: "",
-                guessed: false,
-              })
+              clientLetters.push("");
             }
             game.letters = clientLetters;
             setGameStatus(GameStatus.PLAYING);
@@ -130,8 +127,8 @@ ws.on("connection", client => {
               if (wordLetters[i].letter === letter) {
                 correct = true;
                 wordLetters[i].guessed = true;
-                game.letters[i].letter = wordLetters[i].letter;
-                game.letters[i].guessed = true;
+                // show the letter to the clients
+                game.letters[i] = wordLetters[i].letter;
               }
             }
 
@@ -154,9 +151,46 @@ ws.on("connection", client => {
             // check if game has ended
             checkGame();
             break;
+          case "GUESS_WORD":
+            // ignore if the player is not in the current turn or if the gameStatus is not correct
+            if (game.status !== GameStatus.PLAYING || game.turn.player !== player.id) {
+              return;
+            }
+            let guess = data.word.trim().toUpperCase();
+            if (guess.length !== wordLetters.length || !/^[a-zA-Z]+$/.test(guess)) {
+              return;
+            }
+
+            for (let i = 0; i < guess.length; i++) {
+              if (guess.charAt(i) !== wordLetters[i].letter) {
+                game.lives--;
+                // change turn
+                nextTurn();
+                // send updated lives
+                send("GAME", {game});
+                // check if game has ended
+                checkGame();
+                return;
+              }
+            }
+
+            for (let i = 0; i < wordLetters.length; i++) {
+              wordLetters[i].guessed = true;
+              // show the letter to the clients
+              game.letters[i] = wordLetters[i].letter;
+            }
+            // all letters have been guessed, end the game
+            setGameStatus(GameStatus.ENDED);
+            // reset game after 5 seconds
+            setTimeout(resetGame, 5000);
+            break;
         }
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error(error);
+        try {
+          send("ERROR", {error: "Server error"});
+        } catch (ignored) {
+        }
       }
     });
 
@@ -172,8 +206,8 @@ ws.on("connection", client => {
     send("PLAYERS", {players}, client);
 
     nextPlayerId++;
-  } catch (e) {
-    console.log(e);
+  } catch (error) {
+    console.log(error);
   }
 });
 

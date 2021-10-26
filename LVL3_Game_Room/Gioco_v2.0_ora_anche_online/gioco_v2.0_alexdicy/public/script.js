@@ -256,11 +256,9 @@ const app = new Vue({
     "game.status"() {
       this.handleGameStatus();
     },
-    //"game.turn.player"() {
-    //  if (this.game.turn.player === this.player.id) {
-    //    this.alert("Scegli una lettera o prova ad indovinare", "È il tuo turno!");
-    //  }
-    //}
+    "game.turn.player"() {
+      this.guessInput = "";
+    }
   },
   mounted() {
     this.handleGameStatus();
