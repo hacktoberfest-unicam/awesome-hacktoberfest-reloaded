@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!--suppress EqualityComparisonWithCoercionJS, HtmlUnknownAttribute, HtmlUnknownTag -->
+<!--suppress EqualityComparisonWithCoercionJS, HtmlUnknownTag -->
 <html lang="it">
 <head>
   <title>Gioco dell'impiccato</title>
@@ -23,9 +23,9 @@
     <toast v-for="alert in alerts" :text="alert.text" :title="alert.title" :time="alert.time" @hidden="alert.hideCallback" :key="alert.id"></toast>
   </div>
 
-  <div id="lobby" v-if="showLobby">
+  <div class="lobby" v-if="showLobby">
     <div class="lobby-title">Lobby</div>
-    <div id="lobby-player-list">
+    <div class="lobby-player-list">
       <div v-for="p in players" :key="p.id" class="player" :class="{me: p.id == player.id}">
         <div class="flex">
           <img class="avatar" src="images/player-avatar.svg" alt="">
@@ -39,25 +39,10 @@
         </div>
       </div>
     </div>
-    <button @click="voteToStart" :disabled="disableStartVote || players.length < 2" id="start-vote" class="button">Vota per iniziare</button>
+    <button @click="voteToStart" :disabled="disableStartVote || players.length < 2" class="button start-vote">Vota per iniziare</button>
   </div>
 
-  <div id="overlay" v-if="overlay.show">
-    <div id="overlay-title">{{ overlay.title }}</div>
-    <div id="overlay-content">
-      {{ overlay.content }}
-      <div class="flex" v-if="overlay.showInput">
-        <div class="input-group">
-          <input type="text" :placeholder="overlay.input.placeholder" id="overlay-input" ref="overlayInput"
-                 :minlength="overlay.input.minLength" :required="overlay.input.required" autocomplete="off"
-                 @keyup.enter="overlay.input.onSend" v-model="overlay.input.value" autofocus/>
-          <div class="shadow"></div>
-          <label for="overlay-input" class="input-label">{{ overlay.input.label }}</label>
-        </div>
-        <button @click="overlay.input.onSend" class="button">{{ overlay.input.buttonText }}</button>
-      </div>
-    </div>
-  </div>
+  <overlay v-if="overlay.show" :overlay="overlay"></overlay>
 
   <div class="main-container" v-if="!showLobby && !overlay.show">
     <div class="lives-container">
@@ -101,36 +86,13 @@
         </div>
       </div>
       <div class="sidebar">
-        <div v-for="p in players" :key="p.id" class="player" :class="{me: p.id == player.id}">
-          <img class="turn-arrow" v-if="p.id == game.turn.player" src="images/turn-arrow.svg" alt="Current turn">
-          <div class="current-turn" v-if="p.id == player.id && p.id == game.turn.player">
-            È il tuo turno
-          </div>
-          <div class="flex">
-            <div class="avatar">
-              <svg class="crown" v-if="game.chooser && p.id == game.chooser.id" xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-                <g transform="translate(128 128) scale(1.21 1.21)" style="">
-                  <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;"
-                     transform="translate(-104.85 -104.85) scale(2.33 2.33)">
-                    <path
-                        d="M 78.517 77.617 H 11.483 c -0.951 0 -1.77 -0.669 -1.959 -1.601 L 0.041 29.542 c -0.159 -0.778 0.157 -1.576 0.806 -2.034 c 0.648 -0.459 1.506 -0.489 2.186 -0.079 l 25.585 15.421 l 14.591 -29.358 c 0.335 -0.674 1.021 -1.104 1.774 -1.11 c 0.709 -0.003 1.445 0.411 1.792 1.08 l 15.075 29.1 L 86.968 27.43 c 0.681 -0.41 1.537 -0.379 2.186 0.079 s 0.965 1.256 0.807 2.034 l -9.483 46.474 C 80.286 76.948 79.467 77.617 78.517 77.617 z"
-                        fill="currentColor"
-                        style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill-rule: nonzero; opacity: 1;"
-                        transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round"/>
-                  </g>
-                </g>
-              </svg>
-              <img src="images/player-avatar.svg" alt="">
-            </div>
-            <div class="name">{{ p.nickname }}</div>
-          </div>
-        </div>
+        <sidebar-player v-for="p in players" :key="p.id" :player="p" :player-id="player.id" :chooser="game.chooser" :turn="game.turn"></sidebar-player>
       </div>
     </div>
 
-    <div class="flex" style="margin-top: 120px">
-      <form id="guess-form" class="input-group">
-        <input type="text" id="guess-input" required placeholder=" " :disabled="player.id != game.turn.player" autocomplete="off">
+    <div class="guess-container">
+      <form id="guess-form" class="input-group" @submit.prevent="guessWord">
+        <input type="text" id="guess-input" v-model="guessInput" required placeholder=" " :disabled="player.id != game.turn.player" autocomplete="off">
         <div class="shadow"></div>
         <label for="guess-input" class="input-label">Parola</label>
       </form>

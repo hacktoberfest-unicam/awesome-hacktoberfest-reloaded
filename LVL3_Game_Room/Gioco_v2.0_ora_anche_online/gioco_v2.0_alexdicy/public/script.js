@@ -1,12 +1,16 @@
 import Game from "./modules/Game.js";
 import GameStatus from "./modules/GameStatus.js";
 import Player from "./modules/Player.js";
+import Toast from "./components/Toast.js";
+import Overlay from "./components/Overlay.js";
+import SidebarPlayer from "./components/SidebarPlayer.js";
 
 // websocket
 let ws;
 
 const app = new Vue({
   el: "#app",
+  components: {Toast, Overlay, SidebarPlayer},
   data: {
     alerts: [],
     overlay: {
@@ -20,7 +24,8 @@ const app = new Vue({
     hasJoined: false,
     players: [],
     player: new Player(-1),
-    keyboard: []
+    keyboard: [],
+    guessInput: ""
   },
   methods: {
     alert(text, title = "Notification") {
@@ -67,17 +72,23 @@ const app = new Vue({
       if (key.guessed || this.game.turn.player !== this.player.id) {
         return;
       }
-      this.game.turn.player = -1; // block everything
-      // revert after 5 seconds
-      setTimeout(() => {
-        if (this.game.turn.player === -1) {
-          this.game.turn.player = this.player.id;
-        }
-      }, 5000);
+      this.lockTurn();
 
       key.guessed = true;
 
       this.send("CHOOSE_LETTER", {letter: key.letter});
+    },
+    guessWord() {
+      if (this.game.turn.player !== this.player.id) {
+        return;
+      }
+      let word = this.guessInput.trim().toUpperCase();
+      if (word.length !== this.game.letters.length) {
+        this.alert("La lunghezza della parola è diversa dalla parola da indovinare", "Ritenta");
+        return;
+      }
+      this.lockTurn();
+      this.send("GUESS_WORD", {word});
     },
     voteToStart() {
       // allow vote only if there is more than one player
@@ -85,6 +96,16 @@ const app = new Vue({
         this.disableStartVote = true;
         this.send("START_VOTE");
       }
+    },
+    lockTurn() {
+      // block everything
+      this.game.turn.player = -1;
+      // revert after 5 seconds
+      setTimeout(() => {
+        if (this.game.turn.player === -1) {
+          this.game.turn.player = this.player.id;
+        }
+      }, 5000);
     },
     openOverlay(title, content = null, input = null) {
       this.overlay.show = true;
@@ -242,76 +263,3 @@ const app = new Vue({
 });
 
 window.app = app;
-
-Vue.component("toast", {
-  props: {
-    title: String,
-    text: String,
-    time: {type: Number, default: 5},
-    hideCallback: Function
-  },
-  data() {
-    return {
-      show: false
-    }
-  },
-  template: `<div class="toast toast-dark fade" :class="{'show': show}">
-                <div class="toast-header">
-                  <strong class="toast-title">{{ title }}</strong>
-                  <button @click="hide" type="button" class="btn-close"></button>
-                </div>
-                <div class="toast-body">
-                  {{ text }}
-                </div>
-              </div>`,
-  methods: {
-    hide() {
-      this.show = false;
-      setTimeout(() => {
-        this.$emit("hidden");
-      }, 200);
-    }
-  },
-  mounted() {
-    setTimeout(() => {
-      this.show = true;
-    }, 100);
-    setTimeout(() => {
-      this.hide();
-    }, this.time * 1000 - 200);
-  }
-});
-
-
-let guessForm = document.getElementById("guess-form");
-
-let head = document.getElementById("head");
-let neck = document.getElementById("neck");
-let leftArm = document.getElementById("left-arm");
-let rightArm = document.getElementById("right-arm");
-let waist = document.getElementById("waist");
-let leftLeg = document.getElementById("left-leg");
-let rightLeg = document.getElementById("right-leg");
-
-
-guessForm.addEventListener("submit", e => {
-  e.preventDefault();
-  let input = document.getElementById("guess-input");
-  let word = input.value.trim().toUpperCase();
-  if (word.length === letters.length) {
-    for (let i = 0; i < word.length; i++) {
-      // noinspection EqualityComparisonWithCoercionJS
-      if (word.charAt(i) != letters[i].letter) {
-        lives--;
-        updateLives();
-        checkGameOver();
-        return false;
-      }
-    }
-    // ha vinto
-    openOverlay("Hai vinto, Giocatore 2");
-  } else {
-    this.alert("La lunghezza della parola è diversa dalla parola da indovinare", "Ritenta");
-  }
-  return false;
-});

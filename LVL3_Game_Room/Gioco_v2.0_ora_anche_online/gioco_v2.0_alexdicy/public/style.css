@@ -84,7 +84,7 @@ html, body {
     margin-right: auto;
 }
 
-#lobby, #overlay {
+.lobby, .overlay {
     display: flex;
     flex-direction: column;
     position: fixed;
@@ -105,32 +105,32 @@ html, body {
     font-weight: 700;
 }
 
-#lobby-player-list {
+.lobby-player-list {
     width: 100%;
     max-width: 680px;
     margin: auto auto 0 auto;
 }
 
-#lobby-player-list .player {
+.lobby-player-list .player {
     display: inline-block;
     width: 100%;
     max-width: 280px;
     margin: 12px;
 }
 
-#lobby-player-list .player.not-connected {
+.lobby-player-list .player.not-connected {
     opacity: 0.5;
     font-size: 16px;
 }
 
 @media screen and (min-width: 860px) {
-    #lobby-player-list .player:last-of-type:nth-of-type(odd):not(:first-child) {
+    .lobby-player-list .player:last-of-type:nth-of-type(odd):not(:first-child) {
         margin-right: 328px;
     }
 }
 
 
-#start-vote {
+.button.start-vote {
     margin: 40px auto auto auto;
     width: 200px;
     border-radius: 2px;
@@ -138,23 +138,23 @@ html, body {
     font-family: inherit;
 }
 
-#start-vote:disabled {
+.button.start-vote:disabled {
     cursor: default;
     opacity: 0.2;
 }
 
-#overlay-title {
+.overlay-title {
     margin-top: auto;
     font-size: 32px;
 }
 
-#overlay-content {
+.overlay-content {
     margin-top: 12px;
     margin-bottom: auto;
     font-size: 22px;
 }
 
-#overlay-content > .flex {
+.overlay-content > .flex {
     margin-top: 40px;
 }
 
@@ -471,6 +471,12 @@ html, body {
     border-radius: 20px;
     height: 4px;
     background-color: gray
+}
+
+.guess-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 120px;
 }
 
 .flex {
