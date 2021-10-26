@@ -51,11 +51,12 @@
       <img class="lives-heart" src="images/heart.png" alt="heart icon">
     </div>
 
-    <!--
-    <div class="bottom-info-container">
-      <div id="connected-players"></div>
+    <div class="bottom-info-container" v-if="spectating">
+      <div class="bottom-info-text">
+        Modalità spettatore
+        <br><small>(Attendi la fine del gioco)</small>
+      </div>
     </div>
-    -->
 
     <div id="keyboard" :class="{'other-turn': player.id != game.turn.player}">
       <div v-for="key in keyboard" @click="keyClick(key)" class="letter" :class="{guessed: key.guessed}">{{ key.letter }}</div>

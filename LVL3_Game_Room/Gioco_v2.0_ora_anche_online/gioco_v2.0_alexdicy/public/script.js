@@ -27,6 +27,11 @@ const app = new Vue({
     keyboard: [],
     guessInput: ""
   },
+  computed: {
+    spectating() {
+      return !this.hasJoined && this.game.status === GameStatus.PLAYING;
+    }
+  },
   methods: {
     alert(text, title = "Notification") {
       let id = Date.now();
@@ -103,6 +108,7 @@ const app = new Vue({
       // revert after 5 seconds
       setTimeout(() => {
         if (this.game.turn.player === -1) {
+          this.alert("Si è verificato un errore", "Riprova");
           this.game.turn.player = this.player.id;
         }
       }, 5000);
