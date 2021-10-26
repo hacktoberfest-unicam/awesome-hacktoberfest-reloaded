@@ -9,6 +9,7 @@ export default Vue.component("overlay", {
       <div class="overlay-title">{{ overlay.title }}</div>
       <div class="overlay-content">
         {{ overlay.content }}
+        <div v-html="overlay.html"></div>
         <div class="flex" v-if="overlay.showInput">
           <div class="input-group">
             <input type="text" :placeholder="overlay.input.placeholder" id="overlay-input" ref="overlayInput"
@@ -21,4 +22,9 @@ export default Vue.component("overlay", {
         </div>
       </div>
     </div>`,
+  methods: {
+    focusInput() {
+      this.$refs.overlayInput.focus();
+    }
+  }
 });

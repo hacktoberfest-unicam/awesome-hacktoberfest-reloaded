@@ -147,6 +147,7 @@ html, body {
 .overlay-title {
     margin-top: auto;
     font-size: 32px;
+    font-weight: bold;
 }
 
 .overlay-content {
@@ -480,6 +481,12 @@ html, body {
     margin-top: 120px;
 }
 
+.end-screen-word {
+    display: flex;
+    margin-top: 50px;
+    justify-content: center;
+}
+
 .flex {
     display: flex;
     justify-content: center;
@@ -516,7 +523,7 @@ input[disabled], input[disabled] ~ .shadow, button[disabled] {
     position: absolute;
     content: "";
     width: 100%;
-    height: 2px;
+    height: 4px;
     bottom: 0;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.28);
 }

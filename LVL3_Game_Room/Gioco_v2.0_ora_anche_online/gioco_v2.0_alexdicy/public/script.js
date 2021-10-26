@@ -16,7 +16,8 @@ const app = new Vue({
     overlay: {
       show: false,
       title: "",
-      content: ""
+      content: "",
+      html: null
     },
     game: new Game(),
     showLobby: false,
@@ -61,12 +62,12 @@ const app = new Vue({
       let word = this.overlay.input.value.trim().toUpperCase();
       if (word.length < 2 || word.includes(" ")) {
         this.alert("La parola deve essere lunga 2 o più caratteri e non deve contenere spazi", "Errore");
-        this.overlay.input.focus();
+        this.$refs.overlay.focusInput();
         return;
       }
       if (!/^[a-zA-Z]+$/.test(word)) {
         this.alert("La parola deve contenere solo lettere", "Errore");
-        this.overlay.input.focus();
+        this.$refs.overlay.focusInput();
         return;
       }
 
@@ -116,6 +117,7 @@ const app = new Vue({
     openOverlay(title, content = null, input = null) {
       this.overlay.show = true;
       this.overlay.title = title;
+      this.overlay.html = null;
       this.overlay.content = content;
       if (input && typeof input === "object") {
         this.overlay.showInput = true;
@@ -134,55 +136,72 @@ const app = new Vue({
     },
     connectWS() {
       const secure = window.location.protocol !== "http:";
-      ws = new WebSocket((secure ? "wss://" : "ws://") + window.location.host);
-      ws.addEventListener("error", () => {
-        this.hasJoined = false;
+      try {
+        ws = new WebSocket((secure ? "wss://" : "ws://") + window.location.host);
+
+        ws.addEventListener("error", () => {
+          console.error("WebSocket Error");
+        });
+        ws.addEventListener("close", () => {
+          this.hasJoined = false;
+          this.alert("Disconnesso dal server, mi sto riconnettendo");
+          setTimeout(this.connectWS, 1000);
+        });
+        ws.addEventListener("open", () => {
+          this.hasJoined = false;
+          console.log("Connected to Websocket");
+        });
+        ws.addEventListener("message", m => {
+          let message = JSON.parse(m.data);
+          switch (message.type) {
+            case "ERROR":
+              this.alert(message.error, "Errore");
+              break;
+            case "WELCOME":
+              console.log("Received Welcome from Websocket server");
+              break;
+            case "LOG":
+              console.log(message.log);
+              break;
+            case "GAME":
+              this.game = message.game;
+              if (!this.hasJoined) {
+                this.askNickname();
+              }
+              break;
+            case "KEYBOARD":
+              this.keyboard = message.keyboard;
+              break;
+            case "JOINED":
+              console.log("Joined successfully");
+              this.player = message.player;
+              this.overlay.show = false;
+              this.hasJoined = true;
+              break;
+            case "PLAYER_INFO":
+              this.player = message.player;
+              break;
+            case "PLAYERS":
+              this.players = message.players;
+              break;
+            case "WIN":
+            case "LOST":
+              if (message.type === "WIN") {
+                this.openOverlay("La parola è stata indovinata!", "Complimenti ai giocatori, la parola era:");
+              } else {
+                this.openOverlay("GAME OVER!", "La parola era:");
+              }
+              let divs = [];
+              for (let letter of message.word) {
+                divs.push(`<div class="word-letter">${letter}</div>`);
+              }
+              this.overlay.html = `<div class="end-screen-word">${divs.join("\n")}</div>`;
+              break;
+          }
+        });
+      } catch (error) {
         this.alert("Errore di connessione al server");
-      });
-      ws.addEventListener("close", () => {
-        this.hasJoined = false;
-        this.alert("Disconnesso dal server, mi sto riconnettendo");
-        setTimeout(this.connectWS, 1000);
-      });
-      ws.addEventListener("open", () => {
-        this.hasJoined = false;
-        console.log("Connected to Websocket");
-      });
-      ws.addEventListener("message", m => {
-        let message = JSON.parse(m.data);
-        switch (message.type) {
-          case "ERROR":
-            this.alert(message.error, "Errore");
-            break;
-          case "WELCOME":
-            console.log("Received Welcome from Websocket server");
-            break;
-          case "LOG":
-            console.log(message.log);
-            break;
-          case "GAME":
-            this.game = message.game;
-            if (!this.hasJoined) {
-              this.askNickname();
-            }
-            break;
-          case "KEYBOARD":
-            this.keyboard = message.keyboard;
-            break;
-          case "JOINED":
-            console.log("Joined successfully");
-            this.player = message.player;
-            this.overlay.show = false;
-            this.hasJoined = true;
-            break;
-          case "PLAYER_INFO":
-            this.player = message.player;
-            break;
-          case "PLAYERS":
-            this.players = message.players;
-            break;
-        }
-      });
+      }
     },
     askNickname() {
       console.log("Asking for a nickname");
@@ -198,7 +217,7 @@ const app = new Vue({
           let nickname = this.overlay.input.value.trim();
           if (nickname.length < 2) {
             this.alert("Il nickname deve essere lungo 2 o più caratteri", "Riprova");
-            this.$refs.overlayInput.focus();
+            this.$refs.overlay.focusInput();
             return;
           }
 
@@ -243,7 +262,7 @@ const app = new Vue({
           break;
         case GameStatus.ENDED:
           console.log("Game Status: ENDED");
-          this.alert("Tra 5 secondi inizia una nuova partita...", "Il gioco è terminato");
+          this.alert("Tra 10 secondi inizia una nuova partita...", "Il gioco è terminato");
           break;
       }
     },

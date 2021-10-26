@@ -52,7 +52,7 @@ ws.on("connection", client => {
               return;
             }
             let nickname = data.nickname.trim();
-            if (nickname.length < 2) {
+            if (nickname.length < 2 || nickname.length > 30) {
               return;
             }
             // check if already present, use their info if present
@@ -180,9 +180,10 @@ ws.on("connection", client => {
               game.letters[i] = wordLetters[i].letter;
             }
             // all letters have been guessed, end the game
+            send("WIN", {word: guess});
             setGameStatus(GameStatus.ENDED);
-            // reset game after 5 seconds
-            setTimeout(resetGame, 5000);
+            // reset game after 10 seconds
+            setTimeout(resetGame, 10000);
             break;
         }
       } catch (error) {
@@ -318,17 +319,19 @@ function checkGame() {
       // missing a letter
       // check if it's gameover
       if (game.lives < 0) {
+        send("LOST", {word: wordLetters.map(l => l.letter).join("")});
         setGameStatus(GameStatus.ENDED);
-        // reset game after 5 seconds
-        setTimeout(resetGame, 5000);
+        // reset game after 10 seconds
+        setTimeout(resetGame, 10000);
       }
       return;
     }
   }
   // all letters have been guessed
+  send("WIN", {word: wordLetters.map(l => l.letter).join("")});
   setGameStatus(GameStatus.ENDED);
-  // reset game after 5 seconds
-  setTimeout(resetGame, 5000);
+  // reset game after 10 seconds
+  setTimeout(resetGame, 10000);
 }
 
 /**

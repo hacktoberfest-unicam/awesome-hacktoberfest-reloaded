@@ -42,7 +42,7 @@
     <button @click="voteToStart" :disabled="disableStartVote || players.length < 2" class="button start-vote">Vota per iniziare</button>
   </div>
 
-  <overlay v-if="overlay.show" :overlay="overlay"></overlay>
+  <overlay v-if="overlay.show" :overlay="overlay" ref="overlay"></overlay>
 
   <div class="main-container" v-if="!showLobby && !overlay.show">
     <div class="lives-container">
