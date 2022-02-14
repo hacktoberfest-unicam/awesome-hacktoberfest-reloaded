@@ -1,24 +1,40 @@
 //#![allow(unused_imports)]
-// Last edit: 22:21 - 31/10/2021
+// Last edit: 00:30 - 21/11/2021
+
 use teloxide::{prelude::*, types::{ChatPermissions, Me}, utils::command::BotCommand};
+//use teloxide::utils::command::ParseError;
 use std::env;
 use std::error::Error;
 use std::str;
 use std::str::FromStr;
 use std::process::Command;
 use chrono::{DateTime, Duration, NaiveDateTime, Utc};
+use teloxide::types::Message;
+//use std::io::{stdin, stdout, Write};
+/*
+fn custom_parse_function(s: String) -> Result<(u8, String), ParseError> {
+    let vec = s.split_whitespace().collect::<Vec<_>>();
+    let (left, right) = match vec.as_slice() {
+        [l, r] => (l, r),
+        _ => return Err(ParseError::IncorrectFormat("might be 2 arguments!".into())),
+    };
+    left.parse::<u8>()
+        .map(|res| (res, (*right).to_string()))
+        .map_err(|_| ParseError::Custom("First argument must be a integer!".to_owned().into()))
+}
+*/
 
 #[derive(BotCommand)]
-#[command(rename = "lowercase", description = "Lista comandi", parse_with = "split")]
+#[command(rename = "lowercase", description = "Lista comandi")]
 enum Commands {
     #[command(description = "Mostra lista comandi.")]
     Help,
     #[command(description = "Gestisci una macro.", parse_with = "split")]
     Macro {option: String, macro_str: String},
     #[command(description = "Banna un utente da un gruppo.")]
-    Ban, 
+    Ban {reason: String},
     #[command(description = "Kicka un utente da un gruppo.")]
-    Kick,
+    Kick {reason_k: String},
     #[command(description = "Muta un utente da un gruppo.", parse_with = "split")]    
     Mute {time: u64, unit: UnitOfTime},
     #[command(description = "Annulla il ban ad un utente di un gruppo.")]
@@ -26,18 +42,32 @@ enum Commands {
     #[command(description = "Controlla i log.")]
     Logs,
     #[command(description = "Il bot risponde?")]
-    On,
+    Ping,
     #[command(description = "La mia pagina github.")]
     Info,
-    #[command(description = "Effettua un calcolo.")]
+    #[command(description = "Effettua un calcolo.", parse_with = "split")]
     Calc {x: u32, y: u32, operator: String},
+    #[command(description = "Lista contatti utili.")]
+    Contatti {who: String},
+    #[command(description = "Consulta gli orari")]
+    Orari,
+    #[command(description = "Cerca un'aula virtuale webex", parse_with = "split")]
+    Webex {nome: String, cognome: String},
+    #[command(description = "Effettua una ricerca su google")]
+    Google {query: String},
+    #[command(description = "Cerca sulla wiki di Arch Linux")]
+    Wiki {query_arch: String},
+    #[command(description = "Cerca sulle pagine del manuale")]
+    Man {query_man: String},
 }
+
 
 enum UnitOfTime {
     Seconds,
     Minutes,
     Hours,
 }
+
 
 impl FromStr for UnitOfTime {
     type Err = &'static str;
@@ -51,6 +81,19 @@ impl FromStr for UnitOfTime {
     }
 }
 
+
+struct Cinfo {
+    email: String,
+    sito: String,
+    telefono: String,
+}
+
+struct Didattica {
+    email: String,
+    sito: String,
+    telefono: String,
+}
+
 // Calculates time of user restriction.
 fn calc_restrict_time(time: u64, unit: UnitOfTime) -> Duration {
     match unit {
@@ -62,18 +105,6 @@ fn calc_restrict_time(time: u64, unit: UnitOfTime) -> Duration {
 
 
 type Cx = UpdateWithCx<AutoSend<Bot>, Message>;
-
-/*
-async fn Calc(cx: &Cx, x: u64, y: u64, operator: &str) { 
-    match operator {
-        "+" => cx.answer(format!("{}", x+y)),
-        "-" => cx.answer(format!("{}", x-y)),
-        "x" => cx.answer(format!("{}", x*y)),
-        "/" => cx.answer(format!("{}", x/y)),
-        _   => cx.answer("Non ho capito che operazione vuoi fare"),
-    };
-}
-*/
 
 //Muta un utente rispondendo a un suo messaggio
 //Aggiungere welcome_message e macro personalizzabili
@@ -124,10 +155,10 @@ async fn mute_user(cx: &Cx, time: Duration) -> Result<(), Box<dyn Error + Send +
                                     ) + time,
                                 )
                                 .await?;
-                            cx.answer(format!("{} e' stato mutato fino al {}", msg1.from().unwrap().first_name, DateTime::<Utc>::from_utc(
+                            cx.reply_to(format!("{} e' stato mutato fino al {}", msg1.from().unwrap().first_name, DateTime::<Utc>::from_utc(
                                         NaiveDateTime::from_timestamp(cx.update.date as i64, 0),
                                         Utc,
-                                    ) + time)).await?;
+                                    ) + time)).send().await?;
                         }
                     }
                 }
@@ -152,7 +183,7 @@ async fn mute_user(cx: &Cx, time: Duration) -> Result<(), Box<dyn Error + Send +
 
 
 // Kicka un utente
-async fn kick_user(cx: &Cx, str_msg: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
+async fn kick_user(cx: &Cx, str_msg: &str, reason_k: String) -> Result<(), Box<dyn Error + Send + Sync>> {
     match cx.update.reply_to_message() {
 
         Some(mes) => {
@@ -184,12 +215,20 @@ async fn kick_user(cx: &Cx, str_msg: &str) -> Result<(), Box<dyn Error + Send + 
                         
                         // L'utente che "subisce" il comando e' un utente normale
                         // Si puo' procedere con il comando
+
                         false => {
+                            let mut rsn_k = "";
+                            let mut r_k = rsn_k.to_owned();
                             cx.requester
                                 .unban_chat_member(cx.update.chat_id(), mes.from().unwrap().id)
                                 .send()
                                 .await?;
-                            cx.answer(format!("{} {}", mes.from().unwrap().first_name, str_msg)).await?;
+
+                            if reason_k.is_empty() == false {
+                                rsn_k = "Motivo: ";
+                                r_k = rsn_k.to_owned() + &reason_k;
+                            }
+                            cx.reply_to(format!("{} {}\n{}", mes.from().unwrap().first_name, str_msg, r_k)).send().await?;
                             //cx.answer(format!("Utente {} kickato", mes.from().unwrap().id)).await?;
                         }
                     }
@@ -214,8 +253,9 @@ async fn kick_user(cx: &Cx, str_msg: &str) -> Result<(), Box<dyn Error + Send + 
 }
 
 // Banna un utente 
-async fn ban_user(cx: &Cx) -> Result<(), Box<dyn Error + Send + Sync>> {
+async fn ban_user(cx: &Cx, reason: String) -> Result<(), Box<dyn Error + Send + Sync>> {
     match cx.update.reply_to_message() {
+
         Some(message) => {
             
             // Controlliamo i permessi di chi invoca il comando
@@ -232,27 +272,33 @@ async fn ban_user(cx: &Cx) -> Result<(), Box<dyn Error + Send + Sync>> {
                     // Se entra qui dentro vuol dire che un amministratore sta invocando il comando
                     // Utente che "subisce" il comando
                     // controlliamo se e' un admin o un normale utente
-
+                    
                     let to_ban = cx.requester.get_chat_member(cx.update.chat_id(), message.from().unwrap().id).send().await?;
                     let _to_ban= to_ban.is_privileged();
-
                     match _to_ban {
             
                         // L'utente che "subisce" il comando e' un amministratore
                         true => {
                             cx.reply_to("Non posso usare questo comando su un amministratore").send().await?;
                         }
-                          
+
                         // L'utente che "subisce" il comando e' un utente normale
                         // Si puo' procedere con il comando
                         false => {
                
+                            let mut rsn = "";
+                            let mut r = rsn.to_owned();
                             cx.requester
                                 .kick_chat_member(
                                     cx.update.chat_id(),
                                     message.from().expect("Must be MessageKind::Common").id,
                                 ).await?;
-                            cx.answer(format!("{} e' stato bannato", message.from().unwrap().first_name)).await?;
+                            if reason.is_empty() == false {
+                                rsn = "Motivo: ";
+                                r = rsn.to_owned() + &reason;
+                            }
+
+                            cx.reply_to(format!("{} e' stato bannato\n{}", message.from().unwrap().first_name, r)).send().await?;
                         }
                     }
                 } 
@@ -262,6 +308,7 @@ async fn ban_user(cx: &Cx) -> Result<(), Box<dyn Error + Send + Sync>> {
                 }
             }
         }
+
         None => {
             cx.reply_to("Usa questo comando in risposta ad un messaggio").send().await?;
         }
@@ -270,9 +317,11 @@ async fn ban_user(cx: &Cx) -> Result<(), Box<dyn Error + Send + Sync>> {
 }
 
 async fn action(cx: UpdateWithCx<AutoSend<Bot>, Message>, command: Commands) -> Result<(), Box<dyn Error + Send + Sync>> {
-    match command {
 
+    match command { 
+        
         Commands::Help                           => {
+            //cx.reply_to(format!("{}", &Commands::descriptions())).send().await?;
             print_(&cx, &Commands::descriptions()).await?;
         }
 
@@ -280,8 +329,66 @@ async fn action(cx: UpdateWithCx<AutoSend<Bot>, Message>, command: Commands) -> 
             print_(&cx, "@rootinit controlla i log").await?;
         }
 
-        Commands::On                             => {
-            print_(&cx, "Sono online...").await?;
+        Commands::Ping                           => {
+            print_(&cx, "pong").await?;
+        }
+
+        Commands::Orari                          => {
+            print_(&cx, "https://orarilezioni.unicam.it").await?;
+        }
+
+        Commands::Webex{nome, cognome}           => {
+            cx.reply_to(format!("https://unicam.webex.com/meet/{}.{}", nome.to_lowercase(), cognome.to_lowercase())).send().await?;
+        }
+
+        Commands::Google{query}                  => {
+            //let q = String::from(query);
+            //assert!(query.contains(char::is_whitespace));
+            let result = query.replace(" ", "+");
+            cx.reply_to(format!("https://www.google.com/search?q={}", result)).send().await?;
+        }
+
+
+        Commands::Wiki{query_arch}               => {
+            let result_arch = query_arch.replace(" ", "+");
+            cx.reply_to(format!("https://wiki.archlinux.org/index.php?search={}", result_arch)).send().await?;
+        }
+
+        Commands::Man{query_man}                 => {
+            cx.reply_to(format!("https://man.archlinux.org/search?q={}&go=Go", query_man)).send().await?;
+        }
+
+
+        Commands::Contatti{who}                  => {
+            match who.as_str() {
+                "cinfo"                          => {
+                    let cinfo = Cinfo {
+                        email: String::from("cinfo@unicam.it"),
+                        sito: String::from("https://cinfo.unicam.it"),
+                        telefono: String::from("0737402113"),
+                    };
+                    cx.reply_to(format!("Email: {}\nSito web: {}\nTelefono: {}", cinfo.email, cinfo.sito, cinfo.telefono)).send().await?;
+                }
+
+                "segreteria"                     => {
+                    
+                    let segreteria = Didattica {
+                        email: String::from("segreteriastudenti.scienze@unicam.it"),
+                        sito: String::from("https://www.unicam.it/studente/segreterie-studenti"),
+                        telefono: String::from("0737637336"),
+                    };
+                    
+                    cx.reply_to(format!("Email: {}\nSito web: {}\nTelefono: {}", 
+                                        segreteria.email, 
+                                        segreteria.sito, 
+                                        segreteria.telefono)).send().await?;
+                    
+                    cx.reply_to(format!("ORARI\nLunedi': 10:30 - 13:00\nMartedi': 15:00 - 17:00\nMercoledi': 10:30 - 13:00\nGiovedi': 15:00 - 17:00\nVenerdi': 10:30 - 13:00")).send().await?;
+                }
+                _                                => {
+                    cx.reply_to(format!("Devi specificare di chi vuoi i contatti (segreteria, cinfo, ecc...)")).send().await?;
+                }
+            };
         }
 
         Commands::Calc{x, y, operator}           => {
@@ -367,15 +474,16 @@ async fn action(cx: UpdateWithCx<AutoSend<Bot>, Message>, command: Commands) -> 
         }
 
         Commands::Unban                          => {
-            kick_user(&cx, "e' stato sbannato").await?;
+            kick_user(&cx, "e' stato sbannato", "".to_string()).await?;
         }
 
-        Commands::Ban                            => {
-            ban_user(&cx).await?;
+        Commands::Ban{reason}                    => {
+            ban_user(&cx, reason).await?;
+            //cx.reply_to(format!("Motivo: {}", reason)).send().await?;
         }
         
-        Commands::Kick                           => {           
-            kick_user(&cx, "e' stato kickato").await?;
+        Commands::Kick{reason_k}                 => {           
+            kick_user(&cx, "e' stato kickato", reason_k).await?;
         }
 
         
@@ -426,26 +534,25 @@ async fn main() {
 }
 
 async fn print_(cx: &Cx, to_print: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
-    if let Err(e) = cx.answer(format!("{}", to_print)).await {
+    if let Err(e) = cx.reply_to(format!("{}", to_print)).send().await {
         println!("Error: {}", e.to_string());
     }
     Ok(())
 }
 
 async fn print_with(cx: &Cx, to_print_with: &str, to_arg_with: Vec<u8>) -> Result<(), Box<dyn Error + Send + Sync>> {
-    if let Err(er) = cx.answer(format!("{} {:?}", to_print_with, to_arg_with)).await {
+    if let Err(er) = cx.reply_to(format!("{} {:?}", to_print_with, to_arg_with)).send().await {
         println!("Error: {}", er.to_string());
     }
     Ok(())
 }
 
 async fn print_op(cx: &Cx, to_print_op: &str, to_arg_op: u32) -> Result<(), Box<dyn Error + Send + Sync>> {
-    if let Err(op_err) = cx.answer(format!("{} {:?}", to_print_op, to_arg_op)).await {
+    if let Err(op_err) = cx.reply_to(format!("{} {:?}", to_print_op, to_arg_op)).send().await {
         println!("Error: {}", op_err.to_string());
     }
     Ok(())
 }
-
 
 
 async fn run() {
@@ -453,7 +560,7 @@ async fn run() {
     log::info!("Starting simple_commands_bot...");
 
     let _bot = Bot::from_env().auto_send();
-     
+
     let Me {user: _bot_user, ..} = _bot.get_me().await.unwrap();
     
     let _bot_name: String = "INIT.D".into();
